@@ -1,0 +1,541 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#172b4d">
+
+    <title>Paper Details | ResearchLens</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', path='css/dashboard.css') }}?v=15"
+    >
+
+    <style>
+        .detail-page {
+            margin-top: 28px;
+        }
+
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 22px;
+        }
+
+        .back-button,
+        .download-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .back-button {
+            border: 1px solid #dbe3ec;
+            background: #ffffff;
+            color: #475569;
+        }
+
+        .download-button {
+            background: #172b4d;
+            color: #ffffff;
+        }
+
+        .download-button:hover {
+            background: #0f766e;
+        }
+
+        .back-button:hover {
+            background: #f7f9fc;
+        }
+
+        .paper-profile-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding: 28px;
+            margin-bottom: 22px;
+            background: #ffffff;
+            border: 1px solid #edf1f5;
+            border-radius: 14px;
+        }
+
+        .paper-profile-info {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            min-width: 0;
+        }
+
+        .paper-icon {
+            width: 62px;
+            height: 62px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 14px;
+            background: #e6f4f1;
+            color: #0f766e;
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+        .paper-profile-info h2 {
+            margin: 0 0 8px;
+            color: #172b4d;
+            font-size: 20px;
+            overflow-wrap: anywhere;
+        }
+
+        .paper-profile-info p {
+            margin: 0;
+            color: #64748b;
+            font-size: 13px;
+            overflow-wrap: anywhere;
+        }
+
+        .detail-card {
+            padding: 25px;
+            margin-bottom: 22px;
+            background: #ffffff;
+            border: 1px solid #edf1f5;
+            border-radius: 14px;
+        }
+
+        .detail-card h3 {
+            margin: 0 0 22px;
+            color: #172b4d;
+            font-size: 17px;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .detail-item {
+            min-width: 0;
+            padding: 15px;
+            border: 1px solid #edf1f5;
+            border-radius: 9px;
+        }
+
+        .detail-item span {
+            display: block;
+            margin-bottom: 8px;
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .detail-item strong {
+            color: #172b4d;
+            font-size: 14px;
+            overflow-wrap: anywhere;
+        }
+
+        .detail-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            background: #e6f4f1;
+            color: #0f766e;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .metadata-section {
+            margin-bottom: 22px;
+        }
+
+        .metadata-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .metadata-section h4 {
+            margin: 0 0 10px;
+            color: #172b4d;
+            font-size: 14px;
+        }
+
+        .metadata-content {
+            padding: 16px;
+            border: 1px solid #edf1f5;
+            border-radius: 9px;
+            background: #fafbfd;
+            color: #475569;
+            font-size: 13px;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            max-height: 320px;
+            overflow-y: auto;
+        }
+
+        .metadata-empty {
+            color: #94a3b8;
+            font-style: italic;
+        }
+
+        .extracted-text-details {
+            border: 1px solid #edf1f5;
+            border-radius: 9px;
+            overflow: hidden;
+        }
+
+        .extracted-text-details summary {
+            padding: 15px;
+            background: #fafbfd;
+            color: #172b4d;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .extracted-text-details .metadata-content {
+            border: none;
+            border-radius: 0;
+            max-height: 450px;
+        }
+
+        .file-unavailable {
+            color: #b91c1c;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 650px) {
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .paper-profile-card {
+                align-items: flex-start;
+                padding: 20px;
+            }
+
+            .paper-profile-info h2 {
+                font-size: 17px;
+            }
+
+            .detail-card {
+                padding: 18px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="dashboard-layout">
+
+    <aside class="sidebar">
+        <a href="/admin/dashboard" class="brand">
+            <span class="brand-icon">R</span>
+            <span class="brand-name">ResearchLens</span>
+        </a>
+
+        <div class="sidebar-section">
+            <span class="sidebar-label">ADMINISTRATION</span>
+
+            <a href="/admin/dashboard" class="sidebar-link">
+                <span class="nav-icon">▦</span>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="/admin/users" class="sidebar-link">
+                <span class="nav-icon">♙</span>
+                <span>Manage Users</span>
+            </a>
+
+            <a href="/admin/papers" class="sidebar-link active">
+                <span class="nav-icon">▤</span>
+                <span>Research Papers</span>
+            </a>
+
+            <a href="/admin/analyses" class="sidebar-link">
+                <span class="nav-icon">▧</span>
+                <span>Analysis Records</span>
+            </a>
+        </div>
+
+        <div class="sidebar-bottom">
+            <div class="sidebar-help">
+                <div class="help-icon">✦</div>
+                <strong>Manage ResearchLens</strong>
+                <p>Monitor researchers, uploaded papers, and AI-generated reports.</p>
+                <a href="/admin/dashboard">
+                    Back to dashboard <span>→</span>
+                </a>
+            </div>
+
+            <button id="logoutButton" class="logout-button" type="button">
+                <span class="nav-icon">↪</span>
+                <span>Sign out</span>
+            </button>
+        </div>
+    </aside>
+
+    <main class="main-content">
+
+        <header class="topbar">
+            <div class="page-heading">
+                <span class="page-eyebrow">PAPER MANAGEMENT</span>
+                <h1>Paper Details</h1>
+                <p class="topbar-subtitle">
+                    View uploaded research paper information and extracted content.
+                </p>
+            </div>
+
+            <div class="profile-area">
+                <div class="profile-avatar">
+                    {{ (current_admin.display_name or current_admin.email or "A")[0] | upper }}
+                </div>
+
+                <div class="profile-details">
+                    <strong>{{ current_admin.display_name or "Administrator" }}</strong>
+                    <span>{{ current_admin.email }}</span>
+                </div>
+            </div>
+        </header>
+
+        <section class="detail-page">
+
+            <div class="detail-header">
+                <div>
+                    <span class="section-eyebrow">RESEARCH PAPER PROFILE</span>
+                    <h2>Uploaded paper information</h2>
+                </div>
+
+                <a href="/admin/papers" class="back-button">
+                    ← Back to Papers
+                </a>
+            </div>
+
+            <section class="paper-profile-card">
+
+                <div class="paper-profile-info">
+                    <div class="paper-icon">
+                        {{ paper.file_type | upper }}
+                    </div>
+
+                    <div>
+                        <h2>{{ paper.paper_title or paper.original_filename }}</h2>
+                        <p>{{ paper.original_filename }}</p>
+                    </div>
+                </div>
+
+                {% if file_exists %}
+                    <a
+                        href="/admin/papers/{{ paper.id }}/download"
+                        class="download-button"
+                    >
+                        ↓ Download Original File
+                    </a>
+                {% else %}
+                    <span class="file-unavailable">
+                        Original file unavailable
+                    </span>
+                {% endif %}
+
+            </section>
+
+            <section class="detail-card">
+
+                <h3>Paper Information</h3>
+
+                <div class="detail-grid">
+
+                    <div class="detail-item">
+                        <span>Paper ID</span>
+                        <strong>{{ paper.id }}</strong>
+                    </div>
+
+                    <div class="detail-item">
+                        <span>Processing Status</span>
+                        <strong>
+                            <span class="detail-badge">
+                                {{ paper.processing_status or "Unknown" | title }}
+                            </span>
+                        </strong>
+                    </div>
+
+                    <div class="detail-item">
+                        <span>Original Filename</span>
+                        <strong>{{ paper.original_filename }}</strong>
+                    </div>
+
+                    <div class="detail-item">
+                        <span>Stored Filename</span>
+                        <strong>{{ paper.stored_filename }}</strong>
+                    </div>
+
+                    <div class="detail-item">
+                        <span>File Type</span>
+                        <strong>{{ paper.file_type | upper }}</strong>
+                    </div>
+
+                    <div class="detail-item">
+                        <span>File Size</span>
+                        <strong>
+                            {{ "%.2f"|format(paper.file_size / (1024 * 1024)) }} MB
+                        </strong>
+                    </div>
+
+                    <div class="detail-item">
+                        <span>Page Count</span>
+                        <strong>
+                            {{ paper.page_count if paper.page_count is not none else "Not available" }}
+                        </strong>
+                    </div>
+
+                    <div class="detail-item">
+                        <span>Word Count</span>
+                        <strong>
+                            {{ paper.word_count if paper.word_count is not none else "Not available" }}
+                        </strong>
+                    </div>
+
+                    <div class="detail-item">
+                        <span>Uploaded On</span>
+                        <strong>
+                            {{ paper.uploaded_at.strftime("%d %B %Y, %I:%M %p") if paper.uploaded_at else "Unavailable" }}
+                        </strong>
+                    </div>
+
+                </div>
+
+            </section>
+
+            <section class="detail-card">
+
+                <h3>Uploader Information</h3>
+
+                <div class="detail-grid">
+
+                    <div class="detail-item">
+                        <span>Researcher ID</span>
+                        <strong>{{ uploader.id }}</strong>
+                    </div>
+
+                    <div class="detail-item">
+                        <span>Researcher Name</span>
+                        <strong>
+                            {{ uploader.display_name or "Name not provided" }}
+                        </strong>
+                    </div>
+
+                    <div class="detail-item">
+                        <span>Email Address</span>
+                        <strong>{{ uploader.email }}</strong>
+                    </div>
+
+                    <div class="detail-item">
+                        <span>Account Role</span>
+                        <strong>
+                            {{ "Administrator" if uploader.is_admin else "Researcher" }}
+                        </strong>
+                    </div>
+
+                    <div class="detail-item">
+                        <span>Account Status</span>
+                        <strong>
+                            {{ "Active" if uploader.is_active else "Inactive" }}
+                        </strong>
+                    </div>
+
+                </div>
+
+            </section>
+
+            <section class="detail-card">
+
+                <h3>Extracted Paper Metadata</h3>
+
+                <div class="metadata-section">
+                    <h4>Extracted Title</h4>
+                    <div class="metadata-content">
+                        {% if paper.paper_title %}
+                            {{ paper.paper_title }}
+                        {% else %}
+                            <span class="metadata-empty">No title was extracted.</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="metadata-section">
+                    <h4>Abstract</h4>
+                    <div class="metadata-content">
+                        {% if paper.abstract %}
+                            {{ paper.abstract }}
+                        {% else %}
+                            <span class="metadata-empty">No abstract was extracted.</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="metadata-section">
+                    <h4>Keywords</h4>
+                    <div class="metadata-content">
+                        {% if paper.keywords %}
+                            {{ paper.keywords }}
+                        {% else %}
+                            <span class="metadata-empty">No keywords are available.</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="metadata-section">
+                    <h4>References</h4>
+                    <div class="metadata-content">
+                        {% if paper.references_text %}
+                            {{ paper.references_text }}
+                        {% else %}
+                            <span class="metadata-empty">No references were extracted.</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+            </section>
+
+            <section class="detail-card">
+
+                <h3>Extracted Document Text</h3>
+
+                <details class="extracted-text-details">
+                    <summary>View complete extracted text</summary>
+
+                    <div class="metadata-content">{% if paper.extracted_text %}{{ paper.extracted_text }}{% else %}No extracted text is available.{% endif %}</div>
+                </details>
+
+            </section>
+
+        </section>
+
+        <footer class="dashboard-footer">
+            <span class="footer-brand">ResearchLens</span>
+            <span>AI Research Paper Quality Analyzer</span>
+        </footer>
+
+    </main>
+</div>
+
+<script
+    src="{{ url_for('static', path='js/dashboard.js') }}"
+    type="module"
+></script>
+
+</body>
+</html>

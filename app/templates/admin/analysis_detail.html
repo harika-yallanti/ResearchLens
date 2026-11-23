@@ -1,0 +1,794 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#172b4d">
+
+    <title>Analysis Details | ResearchLens</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', path='css/dashboard.css') }}?v=14"
+    >
+
+    <style>
+        .detail-page {
+            padding: 25px 0;
+        }
+
+        .detail-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 22px;
+        }
+
+        .detail-heading h2 {
+            color: #172b4d;
+            margin: 5px 0;
+        }
+
+        .detail-heading p {
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .back-button {
+            display: inline-flex;
+            padding: 10px 15px;
+            border: 1px solid #dbe3ec;
+            border-radius: 8px;
+            background: #ffffff;
+            color: #172b4d;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .detail-card {
+            background: #ffffff;
+            border: 1px solid #edf1f5;
+            border-radius: 14px;
+            padding: 22px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 12px rgba(23, 43, 77, 0.035);
+        }
+
+        .detail-card h3 {
+            color: #172b4d;
+            font-size: 17px;
+            margin: 0 0 18px;
+        }
+
+        .paper-banner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .paper-banner h2 {
+            color: #172b4d;
+            font-size: 19px;
+            overflow-wrap: anywhere;
+        }
+
+        .paper-banner p {
+            color: #64748b;
+            font-size: 13px;
+            margin-top: 7px;
+        }
+
+        .paper-type {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 58px;
+            height: 58px;
+            flex-shrink: 0;
+            border-radius: 12px;
+            background: #e6f4f1;
+            color: #0f766e;
+            font-weight: 800;
+        }
+
+        .paper-banner-content {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            min-width: 0;
+            flex: 1;
+        }
+
+        .download-button {
+            display: inline-flex;
+            align-items: center;
+            padding: 11px 15px;
+            border-radius: 8px;
+            background: #172b4d;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 13px;
+        }
+
+        .info-item {
+            padding: 15px;
+            border: 1px solid #e8edf3;
+            border-radius: 9px;
+            min-width: 0;
+        }
+
+        .info-item span {
+            display: block;
+            color: #64748b;
+            font-size: 12px;
+            margin-bottom: 7px;
+        }
+
+        .info-item strong {
+            display: block;
+            color: #172b4d;
+            font-size: 14px;
+            overflow-wrap: anywhere;
+        }
+
+        .score-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 13px;
+        }
+
+        .score-item {
+            padding: 17px;
+            border: 1px solid #e8edf3;
+            border-radius: 10px;
+        }
+
+        .score-item span {
+            display: block;
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .score-item strong {
+            display: block;
+            margin-top: 9px;
+            color: #0f766e;
+            font-size: 24px;
+        }
+
+        .overall-score {
+            background: #e6f4f1;
+            border-color: #c8e8e0;
+        }
+
+        .content-text {
+            color: #475569;
+            font-size: 13px;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        .json-content {
+            margin: 0;
+            padding: 15px;
+            background: #f7f9fc;
+            border: 1px solid #edf1f5;
+            border-radius: 9px;
+            color: #334155;
+            font-size: 12px;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            overflow-x: auto;
+        }
+
+        .section-block {
+            margin-bottom: 20px;
+        }
+
+        .section-block:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-block h4 {
+            color: #172b4d;
+            font-size: 13px;
+            margin-bottom: 9px;
+        }
+
+        .not-available {
+            color: #94a3b8;
+            font-size: 13px;
+            font-style: italic;
+        }
+
+        .detail-disclaimer {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            background: #f7f9fc;
+            color: #64748b;
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        @media (max-width: 700px) {
+            .info-grid,
+            .score-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .detail-card {
+                padding: 16px;
+            }
+
+            .paper-banner {
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="dashboard-layout">
+
+    <aside class="sidebar">
+
+        <a href="/admin/dashboard" class="brand">
+            <span class="brand-icon">R</span>
+            <span class="brand-name">ResearchLens</span>
+        </a>
+
+        <div class="sidebar-section">
+            <span class="sidebar-label">ADMINISTRATION</span>
+
+            <a href="/admin/dashboard" class="sidebar-link">
+                <span class="nav-icon">▦</span>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="/admin/users" class="sidebar-link">
+                <span class="nav-icon">♙</span>
+                <span>Manage Users</span>
+            </a>
+
+            <a href="/admin/papers" class="sidebar-link">
+                <span class="nav-icon">▤</span>
+                <span>Research Papers</span>
+            </a>
+
+            <a href="/admin/analyses" class="sidebar-link active">
+                <span class="nav-icon">▧</span>
+                <span>Analysis Records</span>
+            </a>
+        </div>
+
+        <div class="sidebar-bottom">
+
+            <div class="sidebar-help">
+                <div class="help-icon">✦</div>
+                <strong>Manage ResearchLens</strong>
+                <p>Monitor researchers, uploaded papers, and AI-generated reports.</p>
+                <a href="/admin/dashboard">Back to dashboard <span>→</span></a>
+            </div>
+
+            <button id="logoutButton" class="logout-button" type="button">
+                <span class="nav-icon">↪</span>
+                <span>Sign out</span>
+            </button>
+
+        </div>
+
+    </aside>
+
+    <main class="main-content">
+
+        <header class="topbar">
+
+            <div class="page-heading">
+                <span class="page-eyebrow">PAPER ANALYSIS MANAGEMENT</span>
+                <h1>Analysis Details</h1>
+                <p class="topbar-subtitle">
+                    View the complete AI-generated research quality report.
+                </p>
+            </div>
+
+            <div class="profile-area">
+                <div class="profile-avatar">
+                    {{ (current_admin.display_name or current_admin.email or "A")[0] | upper }}
+                </div>
+
+                <div class="profile-details">
+                    <strong>{{ current_admin.display_name or "Administrator" }}</strong>
+                    <span>{{ current_admin.email }}</span>
+                </div>
+            </div>
+
+        </header>
+
+        <section class="detail-page">
+
+            <div class="detail-heading">
+                <div>
+                    <span class="section-eyebrow">AI ANALYSIS REPORT</span>
+                    <h2>Report #{{ report.id }}</h2>
+                    <p>
+                        Created on
+                        {{ report.created_at.strftime("%d %b %Y, %I:%M %p") if report.created_at else "Unavailable" }}
+                    </p>
+                </div>
+
+                <a href="/admin/analyses" class="back-button">
+                    ← Back to Analysis Records
+                </a>
+            </div>
+
+            <section class="detail-card">
+
+                <div class="paper-banner">
+
+                    <div class="paper-banner-content">
+
+                        <div class="paper-type">
+                            {{ paper.file_type | upper }}
+                        </div>
+
+                        <div>
+                            <h2>
+                                {{ paper.paper_title or paper.original_filename }}
+                            </h2>
+
+                            <p>{{ paper.original_filename }}</p>
+                        </div>
+
+                    </div>
+
+                    <a
+                        href="/admin/papers/{{ paper.id }}"
+                        class="download-button"
+                    >
+                        View Paper Details
+                    </a>
+
+                </div>
+
+            </section>
+
+            <section class="detail-card">
+
+                <h3>Report Information</h3>
+
+                <div class="info-grid">
+
+                    <div class="info-item">
+                        <span>Report ID</span>
+                        <strong>{{ report.id }}</strong>
+                    </div>
+
+                    <div class="info-item">
+                        <span>Research Paper ID</span>
+                        <strong>{{ paper.id }}</strong>
+                    </div>
+
+                    <div class="info-item">
+                        <span>Researcher</span>
+                        <strong>{{ researcher.display_name or "Not provided" }}</strong>
+                    </div>
+
+                    <div class="info-item">
+                        <span>Researcher Email</span>
+                        <strong>{{ researcher.email }}</strong>
+                    </div>
+
+                    <div class="info-item">
+                        <span>Processing Status</span>
+                        <strong>{{ paper.processing_status }}</strong>
+                    </div>
+
+                    <div class="info-item">
+                        <span>Report Created</span>
+                        <strong>
+                            {{ report.created_at.strftime("%d %b %Y, %I:%M %p") if report.created_at else "Unavailable" }}
+                        </strong>
+                    </div>
+
+                </div>
+
+            </section>
+
+            <section class="detail-card">
+
+                <h3>Research Quality Scores</h3>
+
+                <div class="score-grid">
+
+                    <div class="score-item overall-score">
+                        <span>Overall Score</span>
+                        <strong>
+                            {{ report.overall_score if report.overall_score is not none else "—" }}
+                            {% if report.overall_score is not none %}/100{% endif %}
+                        </strong>
+                    </div>
+
+                    <div class="score-item">
+                        <span>Structure</span>
+                        <strong>
+                            {{ report.structure_score if report.structure_score is not none else "—" }}
+                        </strong>
+                    </div>
+
+                    <div class="score-item">
+                        <span>Writing</span>
+                        <strong>
+                            {{ report.writing_score if report.writing_score is not none else "—" }}
+                        </strong>
+                    </div>
+
+                    <div class="score-item">
+                        <span>Methodology</span>
+                        <strong>
+                            {{ report.methodology_score if report.methodology_score is not none else "—" }}
+                        </strong>
+                    </div>
+
+                    <div class="score-item">
+                        <span>Abstract</span>
+                        <strong>
+                            {{ report.abstract_score if report.abstract_score is not none else "—" }}
+                        </strong>
+                    </div>
+
+                    <div class="score-item">
+                        <span>Conclusion</span>
+                        <strong>
+                            {{ report.conclusion_score if report.conclusion_score is not none else "—" }}
+                        </strong>
+                    </div>
+
+                    <div class="score-item">
+                        <span>References</span>
+                        <strong>
+                            {{ report.references_score if report.references_score is not none else "—" }}
+                        </strong>
+                    </div>
+
+                </div>
+
+            </section>
+
+            <section class="detail-card">
+
+                <h3>AI Summary and Research Content</h3>
+
+                <div class="section-block">
+                    <h4>Analysis Summary</h4>
+                    {% if report.summary %}
+                        <div class="content-text">{{ report.summary }}</div>
+                    {% else %}
+                        <p class="not-available">No summary available.</p>
+                    {% endif %}
+                </div>
+
+                <div class="section-block">
+                    <h4>Paper Summary</h4>
+                    {% if report.paper_summary %}
+                        <div class="content-text">{{ report.paper_summary }}</div>
+                    {% else %}
+                        <p class="not-available">No paper summary available.</p>
+                    {% endif %}
+                </div>
+
+                <div class="section-block">
+                    <h4>Methodology</h4>
+                    {% if report.methodology %}
+                        <div class="content-text">{{ report.methodology }}</div>
+                    {% else %}
+                        <p class="not-available">No methodology details available.</p>
+                    {% endif %}
+                </div>
+
+                <div class="section-block">
+                    <h4>Findings</h4>
+                    {% if report.findings %}
+                        <div class="content-text">{{ report.findings }}</div>
+                    {% else %}
+                        <p class="not-available">No findings available.</p>
+                    {% endif %}
+                </div>
+
+                <div class="section-block">
+                    <h4>Limitations</h4>
+                    {% if report.limitations %}
+                        <div class="content-text">{{ report.limitations }}</div>
+                    {% else %}
+                        <p class="not-available">No limitations available.</p>
+                    {% endif %}
+                </div>
+
+                <div class="section-block">
+                    <h4>Future Work</h4>
+                    {% if report.future_work %}
+                        <div class="content-text">{{ report.future_work }}</div>
+                    {% else %}
+                        <p class="not-available">No future work details available.</p>
+                    {% endif %}
+                </div>
+
+                <div class="section-block">
+                    <h4>Keywords</h4>
+                    {% if report.keywords %}
+                        <pre class="json-content">{{ report.keywords | tojson(indent=2) }}</pre>
+                    {% else %}
+                        <p class="not-available">No keywords available.</p>
+                    {% endif %}
+                </div>
+
+            </section>
+
+            <section class="detail-card">
+
+                <h3>Structure and Formatting Analysis</h3>
+
+                <div class="section-block">
+                    <h4>Structure Summary</h4>
+                    {% if report.structure_summary %}
+                        <div class="content-text">{{ report.structure_summary }}</div>
+                    {% else %}
+                        <p class="not-available">No structure summary available.</p>
+                    {% endif %}
+                </div>
+
+                <div class="section-block">
+                    <h4>Structure Feedback</h4>
+                    {% if report.structure_feedback %}
+                        <div class="content-text">{{ report.structure_feedback }}</div>
+                    {% else %}
+                        <p class="not-available">No structure feedback available.</p>
+                    {% endif %}
+                </div>
+
+                <div class="section-block">
+                    <h4>Detected Sections</h4>
+                    {% if report.detected_sections %}
+                        <pre class="json-content">{{ report.detected_sections | tojson(indent=2) }}</pre>
+                    {% else %}
+                        <p class="not-available">No detected sections available.</p>
+                    {% endif %}
+                </div>
+
+                <div class="section-block">
+                    <h4>Section Analysis</h4>
+                    {% if report.section_analysis %}
+                        <pre class="json-content">{{ report.section_analysis | tojson(indent=2) }}</pre>
+                    {% else %}
+                        <p class="not-available">No section analysis available.</p>
+                    {% endif %}
+                </div>
+
+                <div class="section-block">
+                    <h4>Formatting Issues</h4>
+                    {% if report.formatting_issues %}
+                        <pre class="json-content">{{ report.formatting_issues | tojson(indent=2) }}</pre>
+                    {% else %}
+                        <p class="not-available">No formatting issues recorded.</p>
+                    {% endif %}
+                </div>
+
+            </section>
+
+            <section class="detail-card">
+
+                <h3>Feedback and Recommendations</h3>
+
+                <div class="section-block">
+                    <h4>Writing Feedback</h4>
+                    {% if report.writing_feedback %}
+                        <div class="content-text">{{ report.writing_feedback }}</div>
+                    {% else %}
+                        <p class="not-available">No writing feedback available.</p>
+                    {% endif %}
+                </div>
+
+                <div class="section-block">
+                    <h4>Methodology Feedback</h4>
+                    {% if report.methodology_feedback %}
+                        <div class="content-text">{{ report.methodology_feedback }}</div>
+                    {% else %}
+                        <p class="not-available">No methodology feedback available.</p>
+                    {% endif %}
+                </div>
+
+                <div class="section-block">
+                    <h4>Abstract Feedback</h4>
+                    {% if report.abstract_feedback %}
+                        <div class="content-text">{{ report.abstract_feedback }}</div>
+                    {% else %}
+                        <p class="not-available">No abstract feedback available.</p>
+                    {% endif %}
+                </div>
+
+                <div class="section-block">
+                    <h4>Conclusion Feedback</h4>
+                    {% if report.conclusion_feedback %}
+                        <div class="content-text">{{ report.conclusion_feedback }}</div>
+                    {% else %}
+                        <p class="not-available">No conclusion feedback available.</p>
+                    {% endif %}
+                </div>
+
+                <div class="section-block">
+                    <h4>References Feedback</h4>
+                    {% if report.references_feedback %}
+                        <div class="content-text">{{ report.references_feedback }}</div>
+                    {% else %}
+                        <p class="not-available">No references feedback available.</p>
+                    {% endif %}
+                </div>
+
+                <div class="section-block">
+                    <h4>Strengths</h4>
+                    {% if report.strengths %}
+                        <pre class="json-content">{{ report.strengths | tojson(indent=2) }}</pre>
+                    {% else %}
+                        <p class="not-available">No strengths recorded.</p>
+                    {% endif %}
+                </div>
+
+                <div class="section-block">
+                    <h4>Weaknesses</h4>
+                    {% if report.weaknesses %}
+                        <pre class="json-content">{{ report.weaknesses | tojson(indent=2) }}</pre>
+                    {% else %}
+                        <p class="not-available">No weaknesses recorded.</p>
+                    {% endif %}
+                </div>
+
+                <div class="section-block">
+                    <h4>Missing Sections</h4>
+                    {% if report.missing_sections %}
+                        <pre class="json-content">{{ report.missing_sections | tojson(indent=2) }}</pre>
+                    {% else %}
+                        <p class="not-available">No missing sections recorded.</p>
+                    {% endif %}
+                </div>
+
+                <div class="section-block">
+                    <h4>Recommendations</h4>
+                    {% if report.recommendations %}
+                        <pre class="json-content">{{ report.recommendations | tojson(indent=2) }}</pre>
+                    {% else %}
+                        <p class="not-available">No recommendations available.</p>
+                    {% endif %}
+                </div>
+
+            </section>
+
+            <section class="detail-card">
+
+                <h3>Grammar, Spelling and Clarity Analysis</h3>
+
+                <div class="section-block">
+                    <h4>Grammar Issues</h4>
+                    {% if report.grammar_issues %}
+                        <pre class="json-content">{{ report.grammar_issues | tojson(indent=2) }}</pre>
+                    {% else %}
+                        <p class="not-available">No grammar issues recorded.</p>
+                    {% endif %}
+                </div>
+
+                <div class="section-block">
+                    <h4>Spelling Issues</h4>
+                    {% if report.spelling_issues %}
+                        <pre class="json-content">{{ report.spelling_issues | tojson(indent=2) }}</pre>
+                    {% else %}
+                        <p class="not-available">No spelling issues recorded.</p>
+                    {% endif %}
+                </div>
+
+                <div class="section-block">
+                    <h4>Clarity Issues</h4>
+                    {% if report.clarity_issues %}
+                        <pre class="json-content">{{ report.clarity_issues | tojson(indent=2) }}</pre>
+                    {% else %}
+                        <p class="not-available">No clarity issues recorded.</p>
+                    {% endif %}
+                </div>
+
+                <div class="section-block">
+                    <h4>Writing Tips</h4>
+                    {% if report.writing_tips %}
+                        <pre class="json-content">{{ report.writing_tips | tojson(indent=2) }}</pre>
+                    {% else %}
+                        <p class="not-available">No writing tips available.</p>
+                    {% endif %}
+                </div>
+
+            </section>
+
+            <section class="detail-card">
+
+                <h3>Citation and Reference Analysis</h3>
+
+                <div class="section-block">
+                    <h4>Citation Summary</h4>
+                    {% if report.citation_summary %}
+                        <div class="content-text">{{ report.citation_summary }}</div>
+                    {% else %}
+                        <p class="not-available">No citation summary available.</p>
+                    {% endif %}
+                </div>
+
+                <div class="section-block">
+                    <h4>Citation Issues</h4>
+                    {% if report.citation_issues %}
+                        <pre class="json-content">{{ report.citation_issues | tojson(indent=2) }}</pre>
+                    {% else %}
+                        <p class="not-available">No citation issues recorded.</p>
+                    {% endif %}
+                </div>
+
+                <div class="section-block">
+                    <h4>Missing References</h4>
+                    {% if report.missing_references %}
+                        <pre class="json-content">{{ report.missing_references | tojson(indent=2) }}</pre>
+                    {% else %}
+                        <p class="not-available">No missing references recorded.</p>
+                    {% endif %}
+                </div>
+
+                <div class="section-block">
+                    <h4>Uncited References</h4>
+                    {% if report.uncited_references %}
+                        <pre class="json-content">{{ report.uncited_references | tojson(indent=2) }}</pre>
+                    {% else %}
+                        <p class="not-available">No uncited references recorded.</p>
+                    {% endif %}
+                </div>
+
+                <div class="section-block">
+                    <h4>Citation Format Issues</h4>
+                    {% if report.citation_format_issues %}
+                        <pre class="json-content">{{ report.citation_format_issues | tojson(indent=2) }}</pre>
+                    {% else %}
+                        <p class="not-available">No citation format issues recorded.</p>
+                    {% endif %}
+                </div>
+
+            </section>
+
+            <div class="detail-disclaimer">
+                AI-generated scores and feedback are intended to support
+                research-paper improvement. They should not be treated as a
+                substitute for expert academic review.
+            </div>
+
+        </section>
+
+        <footer class="dashboard-footer">
+            <span class="footer-brand">ResearchLens</span>
+            <span>AI Research Paper Quality Analyzer</span>
+        </footer>
+
+    </main>
+
+</div>
+
+<script src="{{ url_for('static', path='js/dashboard.js') }}" type="module"></script>
+
+</body>
+</html>

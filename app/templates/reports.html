@@ -1,0 +1,1298 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Analysis Reports | ResearchLens</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', path='css/dashboard.css') }}">
+
+    <style>
+        .reports-page {
+            width: 100%;
+            max-width: 1400px;
+            min-width: 0;
+            margin: 0 auto;
+            padding: 26px 0;
+        }
+
+        .reports-page,
+        .reports-page * {
+            box-sizing: border-box;
+        }
+
+        .reports-intro {
+            margin-bottom: 24px;
+        }
+
+        .reports-intro h2 {
+            color: #172b4d;
+            font-size: 23px;
+            margin: 0 0 8px;
+        }
+
+        .reports-intro p {
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.7;
+            max-width: 720px;
+            margin: 0;
+        }
+
+        .history-controls {
+            display: grid;
+            grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+            gap: 14px;
+            margin-bottom: 10px;
+        }
+
+        .history-search {
+            position: relative;
+            display: flex;
+            align-items: center;
+            min-width: 0;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            color: #64748b;
+            font-size: 22px;
+            pointer-events: none;
+        }
+
+        .history-search input,
+        .history-filters select {
+            width: 100%;
+            min-width: 0;
+            height: 46px;
+            padding: 0 14px;
+            border: 1px solid #dbe3ed;
+            border-radius: 10px;
+            background: #ffffff;
+            color: #172b4d;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .history-search input {
+            padding-left: 42px;
+        }
+
+        .history-search input:focus,
+        .history-filters select:focus {
+            border-color: #0f766e;
+            box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.10);
+        }
+
+        .history-filters {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .history-result-count {
+            color: #64748b;
+            font-size: 12px;
+            margin: 0 0 20px;
+        }
+
+        .comparison-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            flex-wrap: wrap;
+            background: #ffffff;
+            border: 1px solid #e8edf3;
+            border-radius: 15px;
+            padding: 18px 22px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 15px rgba(23, 43, 77, 0.04);
+        }
+
+        .comparison-info {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 0;
+        }
+
+        .comparison-info strong {
+            color: #172b4d;
+            font-size: 14px;
+        }
+
+        .comparison-info span {
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .selection-message {
+            color: #b45309;
+            font-size: 12px;
+            min-height: 15px;
+        }
+
+        .comparison-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .compare-button,
+        .clear-selection-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 40px;
+            padding: 10px 16px;
+            border-radius: 9px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .compare-button {
+            border: none;
+            background: #0f766e;
+            color: #ffffff;
+        }
+
+        .compare-button:hover:not(:disabled) {
+            background: #115e59;
+        }
+
+        .compare-button:disabled {
+            background: #cbd5e1;
+            color: #64748b;
+            cursor: not-allowed;
+        }
+
+        .clear-selection-button {
+            border: 1px solid #dbe3ed;
+            background: #ffffff;
+            color: #475569;
+        }
+
+        .clear-selection-button:hover {
+            background: #f8fafc;
+        }
+
+        .score-summary-section {
+            margin-bottom: 24px;
+        }
+
+        .score-summary-heading {
+            color: #172b4d;
+            font-size: 16px;
+            font-weight: 700;
+            margin: 0 0 14px;
+        }
+
+        .score-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .score-summary-card {
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+            min-width: 0;
+            padding: 19px;
+            background: #ffffff;
+            border: 1px solid #e8edf3;
+            border-radius: 13px;
+            box-shadow: 0 4px 14px rgba(23, 43, 77, 0.035);
+        }
+
+        .score-summary-label {
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        .score-summary-card strong {
+            color: #172b4d;
+            font-size: 27px;
+            font-weight: 700;
+            overflow-wrap: anywhere;
+        }
+
+        .score-summary-note {
+            color: #94a3b8;
+            font-size: 11px;
+        }
+
+        .score-trend-section {
+            background: #ffffff;
+            border: 1px solid #e8edf3;
+            border-radius: 16px;
+            padding: 23px;
+            margin-bottom: 28px;
+            box-shadow: 0 4px 15px rgba(23, 43, 77, 0.04);
+            min-width: 0;
+        }
+
+        .score-trend-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .score-trend-header h3 {
+            margin: 0 0 7px;
+            color: #172b4d;
+            font-size: 18px;
+        }
+
+        .score-trend-header p {
+            margin: 0;
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .trend-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            padding: 7px 11px;
+            border-radius: 20px;
+            background: #e8f5f3;
+            color: #0f766e;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .score-trend-chart {
+            width: 100%;
+            min-height: 230px;
+            overflow-x: auto;
+            overflow-y: hidden;
+        }
+
+        .score-trend-chart svg {
+            display: block;
+            height: auto;
+            max-width: none;
+        }
+
+        .chart-empty-message {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 210px;
+            color: #64748b;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .reports-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            align-items: stretch;
+            gap: 18px;
+            min-width: 0;
+        }
+
+        .report-item {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            background: #ffffff;
+            border: 1px solid #e8edf3;
+            border-radius: 15px;
+            padding: 21px;
+            box-shadow: 0 4px 15px rgba(23, 43, 77, 0.04);
+            transition: border-color 0.2s ease,
+                        box-shadow 0.2s ease;
+        }
+
+        .report-item[hidden] {
+            display: none !important;
+        }
+
+        .report-item:hover {
+            border-color: #cbdedb;
+            box-shadow: 0 7px 20px rgba(23, 43, 77, 0.07);
+        }
+
+        .report-item.selected {
+            border-color: #0f766e;
+            box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.09);
+        }
+
+        .report-card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 13px;
+        }
+
+        .report-item h3 {
+            color: #172b4d;
+            font-size: 15px;
+            line-height: 1.55;
+            overflow-wrap: anywhere;
+            margin: 0;
+            min-width: 0;
+        }
+
+        .report-select {
+            flex-shrink: 0;
+            width: 19px;
+            height: 19px;
+            margin: 2px 0 0;
+            accent-color: #0f766e;
+            cursor: pointer;
+        }
+
+        .report-item p {
+            color: #64748b;
+            font-size: 12px;
+            line-height: 1.6;
+            margin: 0 0 15px;
+        }
+
+        .report-score {
+            display: inline-flex;
+            align-self: flex-start;
+            align-items: center;
+            gap: 5px;
+            background: #e8f5f3;
+            color: #0f766e;
+            padding: 7px 11px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 18px;
+            overflow-wrap: anywhere;
+        }
+
+        .report-card-actions {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 9px;
+            margin-top: auto;
+        }
+
+        .report-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 38px;
+            padding: 9px 13px;
+            border-radius: 8px;
+            background: #0f766e;
+            border: 1px solid #0f766e;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+            transition: background 0.2s ease;
+        }
+
+        .report-link:hover {
+            background: #115e59;
+        }
+
+        .report-card-actions .report-link:nth-child(2) {
+            background: #ffffff;
+            color: #0f766e;
+        }
+
+        .report-card-actions .report-link:nth-child(2):hover {
+            background: #e8f5f3;
+        }
+
+        .history-no-results {
+            grid-column: 1 / -1;
+            padding: 35px 20px;
+            text-align: center;
+            color: #64748b;
+            background: #ffffff;
+            border: 1px dashed #d7e1eb;
+            border-radius: 14px;
+        }
+
+        .history-no-results strong {
+            display: block;
+            color: #172b4d;
+            margin-bottom: 8px;
+        }
+
+        .reports-empty {
+            background: #ffffff;
+            border: 1px dashed #d7e1eb;
+            border-radius: 16px;
+            text-align: center;
+            padding: 55px 24px;
+        }
+
+        .reports-empty h3 {
+            color: #172b4d;
+            font-size: 19px;
+            margin: 0 0 10px;
+        }
+
+        .reports-empty p {
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.7;
+            margin: 0 0 20px;
+        }
+
+        @media (max-width: 1100px) {
+            .reports-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .score-summary-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .reports-page {
+                padding: 18px 0;
+            }
+
+            .reports-intro {
+                margin-bottom: 20px;
+            }
+
+            .history-controls {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .comparison-toolbar {
+                align-items: flex-start;
+                flex-direction: column;
+                padding: 18px;
+            }
+
+            .comparison-actions {
+                width: 100%;
+            }
+
+            .compare-button,
+            .clear-selection-button {
+                flex: 1;
+                min-width: 0;
+            }
+
+            .score-trend-section {
+                padding: 18px;
+            }
+
+            .score-trend-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .reports-grid {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .report-item {
+                padding: 18px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .reports-intro h2 {
+                font-size: 20px;
+            }
+
+            .history-filters {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .comparison-toolbar {
+                padding: 16px;
+            }
+
+            .score-trend-section {
+                padding: 16px;
+            }
+
+            .score-summary-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 10px;
+            }
+
+            .score-summary-card {
+                min-width: 0;
+                padding: 13px;
+            }
+
+            .score-summary-card strong {
+                font-size: 22px;
+            }
+
+            .report-item {
+                padding: 17px;
+            }
+
+            .report-card-actions {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                width: 100%;
+            }
+
+            .report-link {
+                min-width: 0;
+                padding: 9px 7px;
+                font-size: 11px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .score-summary-grid {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .comparison-actions {
+                flex-direction: column;
+            }
+
+            .compare-button,
+            .clear-selection-button {
+                width: 100%;
+                flex: auto;
+            }
+
+            .report-card-actions {
+                grid-template-columns: minmax(0, 1fr);
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="dashboard-layout">
+
+    <aside class="sidebar">
+        <a href="/dashboard" class="brand">
+            <span class="brand-icon">R</span>
+            <span class="brand-name">ResearchLens</span>
+        </a>
+
+        <div class="sidebar-section">
+            <span class="sidebar-label">WORKSPACE</span>
+
+            <a href="/dashboard" class="sidebar-link">
+                <span class="nav-icon">▦</span>
+                <span class="sidebar-link-text">Dashboard</span>
+            </a>
+
+            <a href="/upload" class="sidebar-link">
+                <span class="nav-icon">↑</span>
+                <span class="sidebar-link-text">Upload Paper</span>
+            </a>
+
+            <a href="/my-papers" class="sidebar-link">
+                <span class="nav-icon">▤</span>
+                <span class="sidebar-link-text">My Papers</span>
+            </a>
+
+            <a href="/reports" class="sidebar-link active">
+                <span class="nav-icon">▧</span>
+                <span class="sidebar-link-text">Analysis Reports</span>
+            </a>
+
+            <a href="/history" class="sidebar-link">
+                <span class="nav-icon">◷</span>
+                <span class="sidebar-link-text">History</span>
+            </a>
+        </div>
+
+        <div class="sidebar-bottom">
+            <div class="sidebar-help">
+                <div class="help-icon">✦</div>
+                <strong>Need research guidance?</strong>
+                <p>Explore AI-powered insights to improve your paper.</p>
+                <a href="/docs">Explore features →</a>
+            </div>
+
+            <button id="logoutButton" class="logout-button">
+                <span class="nav-icon">↪</span>
+                <span class="sidebar-link-text">Sign out</span>
+            </button>
+        </div>
+    </aside>
+
+    <main class="main-content">
+
+        <header class="topbar">
+            <div class="page-heading">
+                <span class="page-eyebrow">RESEARCH WORKSPACE</span>
+                <h1>Analysis Reports</h1>
+            </div>
+
+            <div class="profile-area">
+                <div class="profile-avatar" id="profileAvatar">
+                    {{ (current_user.display_name or current_user.email[0])[0] | upper }}
+                </div>
+
+                <div class="profile-details">
+                    <strong id="profileName">
+                        {{ current_user.display_name or "Researcher" }}
+                    </strong>
+
+                    <span id="profileEmail">
+                        {{ current_user.email }}
+                    </span>
+                </div>
+            </div>
+        </header>
+
+        <section class="reports-page">
+
+            <div class="reports-intro">
+                <h2>Your saved evaluations</h2>
+                <p>
+                    Revisit AI-generated research paper evaluations
+                    and recommendations. Select two reports to
+                    compare their quality scores and feedback.
+                </p>
+            </div>
+
+            {% if reports %}
+
+            <div class="history-controls">
+                <div class="history-search">
+                    <span class="search-icon">⌕</span>
+
+                    <input
+                        type="search"
+                        id="reportSearch"
+                        placeholder="Search by research paper name..."
+                        aria-label="Search reports by paper name"
+                    >
+                </div>
+
+                <div class="history-filters">
+                    <select id="scoreFilter" aria-label="Filter by quality score">
+                        <option value="all">All Quality Scores</option>
+                        <option value="low">Low Quality (0–49)</option>
+                        <option value="medium">Moderate (50–74)</option>
+                        <option value="high">High Quality (75–100)</option>
+                        <option value="unevaluated">Not Evaluated</option>
+                    </select>
+
+                    <select id="reportSort" aria-label="Sort reports">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="highest">Highest Score</option>
+                        <option value="lowest">Lowest Score</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="history-result-count"
+                 id="historyResultCount"
+                 aria-live="polite">
+                Showing {{ reports|length }} reports
+            </div>
+
+            <div class="comparison-toolbar">
+                <div class="comparison-info">
+                    <strong>Compare your research progress</strong>
+
+                    <span id="selectionCount">
+                        Select two reports to compare.
+                    </span>
+
+                    <div class="selection-message"
+                         id="selectionMessage"
+                         aria-live="polite"></div>
+                </div>
+
+                <div class="comparison-actions">
+                    <button
+                        type="button"
+                        class="compare-button"
+                        id="compareButton"
+                        disabled
+                    >
+                        Compare Selected
+                    </button>
+
+                    <button
+                        type="button"
+                        class="clear-selection-button"
+                        id="clearSelectionButton"
+                    >
+                        Clear Selection
+                    </button>
+                </div>
+            </div>
+
+            <section class="score-summary-section">
+                <h3 class="score-summary-heading">Evaluation Overview</h3>
+
+                <div class="score-summary-grid">
+                    <div class="score-summary-card">
+                        <span class="score-summary-label">Papers Evaluated</span>
+                        <strong id="evaluatedCount">0</strong>
+                        <span class="score-summary-note">Analyzed papers</span>
+                    </div>
+
+                    <div class="score-summary-card">
+                        <span class="score-summary-label">Average Score</span>
+                        <strong id="averageScore">—</strong>
+                        <span class="score-summary-note">Out of 100</span>
+                    </div>
+
+                    <div class="score-summary-card">
+                        <span class="score-summary-label">Highest Score</span>
+                        <strong id="highestScore">—</strong>
+                        <span class="score-summary-note">Best evaluation</span>
+                    </div>
+
+                    <div class="score-summary-card">
+                        <span class="score-summary-label">Lowest Score</span>
+                        <strong id="lowestScore">—</strong>
+                        <span class="score-summary-note">Needs improvement</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="score-trend-section">
+                <div class="score-trend-header">
+                    <div>
+                        <h3>Quality Score Trend</h3>
+                        <p>
+                            Track your research paper evaluation scores over time.
+                        </p>
+                    </div>
+
+                    <span class="trend-badge">Overall Score / 100</span>
+                </div>
+
+                <div class="score-trend-chart" id="scoreTrendChart">
+                    <p class="chart-empty-message">
+                        Your score trend will appear after you have analyzed papers.
+                    </p>
+                </div>
+            </section>
+
+            <div class="reports-grid">
+
+                {% for report, paper in reports %}
+
+                <article
+                    class="report-item"
+                    data-report-id="{{ report.id }}"
+                    data-filename="{{ paper.original_filename|lower }}"
+                    data-score="{{ report.overall_score if report.overall_score is not none else '' }}"
+                    data-date="{{ report.created_at.timestamp() if report.created_at else 0 }}"
+                >
+
+                    <div class="report-card-header">
+                        <h3>{{ paper.original_filename }}</h3>
+
+                        <input
+                            type="checkbox"
+                            class="report-select"
+                            value="{{ report.id }}"
+                            aria-label="Select report {{ report.id }} for comparison"
+                        >
+                    </div>
+
+                    <p>
+                        Generated on
+                        {% if report.created_at %}
+                            {{ report.created_at.strftime("%d %b %Y, %I:%M %p") }}
+                        {% else %}
+                            Date unavailable
+                        {% endif %}
+                    </p>
+
+                    <div class="report-score">
+                        Score:
+                        {{ report.overall_score if report.overall_score is not none else "Not evaluated" }}
+
+                        {% if report.overall_score is not none %}
+                            /100
+                        {% endif %}
+                    </div>
+
+                    <div class="report-card-actions">
+                        <a href="/report/{{ report.id }}"
+                           class="report-link">
+                            View Report →
+                        </a>
+
+                        <a href="/report/{{ report.id }}/download"
+                           class="report-link">
+                            Download PDF
+                        </a>
+                    </div>
+
+                </article>
+
+                {% endfor %}
+
+            </div>
+
+            {% else %}
+
+            <div class="reports-empty">
+                <h3>No analysis reports yet</h3>
+
+                <p>
+                    Analyze an uploaded research paper to generate
+                    your first AI evaluation report.
+                </p>
+
+                <a href="/my-papers" class="report-link">
+                    Go to My Papers
+                </a>
+            </div>
+
+            {% endif %}
+
+        </section>
+
+        <footer class="dashboard-footer">
+            <span>ResearchLens</span>
+            <span>AI Research Paper Quality Analyzer</span>
+        </footer>
+
+    </main>
+</div>
+
+<script src="{{ url_for('static', path='js/dashboard.js') }}"
+        type="module"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const reportsGrid = document.querySelector(".reports-grid");
+
+    if (!reportsGrid) {
+        return;
+    }
+
+    const reportSearch = document.getElementById("reportSearch");
+    const scoreFilter = document.getElementById("scoreFilter");
+    const reportSort = document.getElementById("reportSort");
+    const historyResultCount = document.getElementById("historyResultCount");
+
+    const reportCards = Array.from(
+        document.querySelectorAll(".report-item")
+    );
+
+    const reportCheckboxes = Array.from(
+        document.querySelectorAll(".report-select")
+    );
+
+    const compareButton = document.getElementById("compareButton");
+    const clearSelectionButton = document.getElementById("clearSelectionButton");
+    const selectionCount = document.getElementById("selectionCount");
+    const selectionMessage = document.getElementById("selectionMessage");
+
+    const chartContainer = document.getElementById("scoreTrendChart");
+
+    const noResultsMessage = document.createElement("div");
+    noResultsMessage.className = "history-no-results";
+    noResultsMessage.innerHTML = `
+        <strong>No matching reports found</strong>
+        <span>Try changing your search or quality filter.</span>
+    `;
+    noResultsMessage.hidden = true;
+
+    reportsGrid.appendChild(noResultsMessage);
+
+    function escapeXml(value) {
+        return String(value).replace(/[&<>"']/g, character => {
+            const entities = {
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&apos;"
+            };
+
+            return entities[character];
+        });
+    }
+
+    function getSelectedReports() {
+        return reportCheckboxes
+            .filter(checkbox => checkbox.checked)
+            .map(checkbox => checkbox.value);
+    }
+
+    function updateSelection() {
+        const selectedReports = getSelectedReports();
+        const selectedCount = selectedReports.length;
+
+        compareButton.disabled = selectedCount !== 2;
+
+        if (selectedCount === 0) {
+            selectionCount.textContent =
+                "Select two reports to compare.";
+
+            selectionMessage.textContent = "";
+        } else if (selectedCount === 1) {
+            selectionCount.textContent =
+                "1 report selected. Select one more report.";
+
+            selectionMessage.textContent = "";
+        } else if (selectedCount === 2) {
+            selectionCount.textContent =
+                "2 reports selected. Ready to compare.";
+
+            selectionMessage.textContent = "";
+        } else {
+            selectionCount.textContent =
+                `${selectedCount} reports selected.`;
+
+            selectionMessage.textContent =
+                "Please select only two reports.";
+        }
+
+        document.querySelectorAll(".report-item").forEach(card => {
+            const checkbox = card.querySelector(".report-select");
+
+            card.classList.toggle(
+                "selected",
+                checkbox.checked
+            );
+        });
+    }
+
+    function renderScoreTrend(cards) {
+        const evaluatedReports = cards
+            .filter(card => card.dataset.score !== "")
+            .map(card => ({
+                id: card.dataset.reportId,
+                filename: card.dataset.filename || "Research Paper",
+                score: Number(card.dataset.score),
+                date: Number(card.dataset.date || 0)
+            }))
+            .filter(report =>
+                Number.isFinite(report.score) &&
+                report.score >= 0 &&
+                report.score <= 100
+            )
+            .sort((a, b) => a.date - b.date);
+
+        const evaluatedCount = document.getElementById("evaluatedCount");
+        const averageScore = document.getElementById("averageScore");
+        const highestScore = document.getElementById("highestScore");
+        const lowestScore = document.getElementById("lowestScore");
+
+        if (evaluatedReports.length > 0) {
+            const scores = evaluatedReports.map(report => report.score);
+
+            const totalScore = scores.reduce(
+                (total, score) => total + score,
+                0
+            );
+
+            evaluatedCount.textContent = scores.length;
+            averageScore.textContent =
+                (totalScore / scores.length).toFixed(1);
+
+            highestScore.textContent = Math.max(...scores);
+            lowestScore.textContent = Math.min(...scores);
+
+        } else {
+            evaluatedCount.textContent = "0";
+            averageScore.textContent = "—";
+            highestScore.textContent = "—";
+            lowestScore.textContent = "—";
+        }
+
+        if (evaluatedReports.length === 0) {
+            chartContainer.innerHTML = `
+                <p class="chart-empty-message">
+                    No evaluated reports match your current filters.
+                </p>
+            `;
+            return;
+        }
+
+        const left = 48;
+        const right = 35;
+        const top = 25;
+        const bottom = 45;
+        const height = 260;
+
+        const width = Math.max(
+            760,
+            evaluatedReports.length * 100 + left + right
+        );
+
+        const plotWidth = width - left - right;
+        const plotHeight = height - top - bottom;
+
+        const xPosition = index => {
+            if (evaluatedReports.length === 1) {
+                return left + plotWidth / 2;
+            }
+
+            return left +
+                (index / (evaluatedReports.length - 1)) * plotWidth;
+        };
+
+        const yPosition = score =>
+            top + ((100 - score) / 100) * plotHeight;
+
+        const gridLines = [0, 25, 50, 75, 100];
+
+        const grid = gridLines.map(score => {
+            const y = yPosition(score);
+
+            return `
+                <line
+                    x1="${left}"
+                    y1="${y}"
+                    x2="${width - right}"
+                    y2="${y}"
+                    stroke="#e2e8f0"
+                    stroke-dasharray="4 4"
+                />
+
+                <text
+                    x="${left - 10}"
+                    y="${y + 4}"
+                    text-anchor="end"
+                    font-size="11"
+                    fill="#64748b"
+                >${score}</text>
+            `;
+        }).join("");
+
+        const points = evaluatedReports.map((report, index) => ({
+            ...report,
+            x: xPosition(index),
+            y: yPosition(report.score)
+        }));
+
+        const linePoints = points
+            .map(point => `${point.x},${point.y}`)
+            .join(" ");
+
+        const pointElements = points.map(point => {
+            const dateLabel = point.date
+                ? new Date(point.date * 1000).toLocaleDateString()
+                : "Date unavailable";
+
+            const safeFilename = escapeXml(point.filename);
+            const safeDate = escapeXml(dateLabel);
+
+            return `
+                <circle
+                    cx="${point.x}"
+                    cy="${point.y}"
+                    r="5"
+                    fill="#0f766e"
+                    stroke="#ffffff"
+                    stroke-width="2"
+                >
+                    <title>${safeFilename} | Score: ${point.score}/100 | ${safeDate}</title>
+                </circle>
+
+                <text
+                    x="${point.x}"
+                    y="${point.y - 13}"
+                    text-anchor="middle"
+                    font-size="13"
+                    font-weight="700"
+                    fill="#172b4d"
+                >${point.score}</text>
+            `;
+        }).join("");
+
+        const dateLabels = points.map(point => {
+            const dateLabel = point.date
+                ? new Date(point.date * 1000).toLocaleDateString(
+                    undefined,
+                    { day: "2-digit", month: "short" }
+                )
+                : "";
+
+            return `
+                <text
+                    x="${point.x}"
+                    y="${height - 14}"
+                    text-anchor="middle"
+                    font-size="11"
+                    fill="#64748b"
+                >${escapeXml(dateLabel)}</text>
+            `;
+        }).join("");
+
+        chartContainer.innerHTML = `
+            <svg
+                width="${width}"
+                height="${height}"
+                viewBox="0 0 ${width} ${height}"
+                role="img"
+                aria-label="Line chart showing research paper quality scores over time"
+            >
+                ${grid}
+
+                <polyline
+                    points="${linePoints}"
+                    fill="none"
+                    stroke="#0f766e"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                />
+
+                ${pointElements}
+                ${dateLabels}
+            </svg>
+        `;
+    }
+
+    function filterAndSortReports() {
+        const searchTerm = reportSearch.value.trim().toLowerCase();
+        const selectedScore = scoreFilter.value;
+        const sortOption = reportSort.value;
+
+        let visibleCards = reportCards.filter(card => {
+            const filename = card.dataset.filename || "";
+            const scoreValue = card.dataset.score;
+
+            const score = scoreValue === ""
+                ? null
+                : Number(scoreValue);
+
+            const matchesSearch = filename.includes(searchTerm);
+
+            let matchesScore = true;
+
+            if (selectedScore === "low") {
+                matchesScore = score !== null && score < 50;
+            } else if (selectedScore === "medium") {
+                matchesScore = score !== null &&
+                    score >= 50 && score < 75;
+            } else if (selectedScore === "high") {
+                matchesScore = score !== null &&
+                    score >= 75 && score <= 100;
+            } else if (selectedScore === "unevaluated") {
+                matchesScore = score === null;
+            }
+
+            return matchesSearch && matchesScore;
+        });
+
+        visibleCards.sort((a, b) => {
+            const scoreA = a.dataset.score === ""
+                ? null
+                : Number(a.dataset.score);
+
+            const scoreB = b.dataset.score === ""
+                ? null
+                : Number(b.dataset.score);
+
+            const dateA = Number(a.dataset.date || 0);
+            const dateB = Number(b.dataset.date || 0);
+
+            if (sortOption === "newest") {
+                return dateB - dateA;
+            }
+
+            if (sortOption === "oldest") {
+                return dateA - dateB;
+            }
+
+            if (sortOption === "highest") {
+                if (scoreA === null) return 1;
+                if (scoreB === null) return -1;
+
+                return scoreB - scoreA;
+            }
+
+            if (sortOption === "lowest") {
+                if (scoreA === null) return 1;
+                if (scoreB === null) return -1;
+
+                return scoreA - scoreB;
+            }
+
+            return 0;
+        });
+
+        reportCards.forEach(card => {
+            card.hidden = true;
+        });
+
+        visibleCards.forEach(card => {
+            card.hidden = false;
+            reportsGrid.appendChild(card);
+        });
+
+        reportsGrid.appendChild(noResultsMessage);
+
+        noResultsMessage.hidden = visibleCards.length !== 0;
+
+        historyResultCount.textContent =
+            `Showing ${visibleCards.length} of ${reportCards.length} reports`;
+
+        renderScoreTrend(visibleCards);
+        updateSelection();
+    }
+
+    reportCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener("change", updateSelection);
+    });
+
+    compareButton.addEventListener("click", () => {
+        const selectedReports = getSelectedReports();
+
+        if (selectedReports.length !== 2) {
+            return;
+        }
+
+        const params = new URLSearchParams({
+            report_id_1: selectedReports[0],
+            report_id_2: selectedReports[1]
+        });
+
+        window.location.href =
+            `/reports/compare?${params.toString()}`;
+    });
+
+    clearSelectionButton.addEventListener("click", () => {
+        reportCheckboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+
+        updateSelection();
+    });
+
+    reportSearch.addEventListener("input", filterAndSortReports);
+    scoreFilter.addEventListener("change", filterAndSortReports);
+    reportSort.addEventListener("change", filterAndSortReports);
+
+    filterAndSortReports();
+});
+</script>
+
+</body>
+</html>

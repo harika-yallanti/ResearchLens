@@ -1,0 +1,548 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#172b4d">
+
+    <title>Analysis Records | ResearchLens</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', path='css/dashboard.css') }}?v=13"
+    >
+
+    <style>
+        .admin-page-section {
+            margin-top: 28px;
+        }
+
+        .admin-page-summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .admin-count {
+            padding: 18px 22px;
+            background: #ffffff;
+            border: 1px solid #edf1f5;
+            border-radius: 12px;
+            min-width: 190px;
+        }
+
+        .admin-count span {
+            display: block;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .admin-count strong {
+            display: block;
+            margin-top: 7px;
+            color: #172b4d;
+            font-size: 27px;
+        }
+
+        .admin-table-wrap {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .admin-table {
+            width: 100%;
+            min-width: 850px;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .admin-table th {
+            padding: 15px 14px;
+            background: #f7f9fc;
+            color: #64748b;
+            font-size: 11px;
+            letter-spacing: .5px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .admin-table td {
+            padding: 16px 14px;
+            border-bottom: 1px solid #edf1f5;
+            color: #334155;
+            font-size: 13px;
+            vertical-align: middle;
+        }
+
+        .admin-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .admin-table strong {
+            color: #172b4d;
+            overflow-wrap: anywhere;
+        }
+
+        .admin-score {
+            display: inline-block;
+            min-width: 58px;
+            text-align: center;
+            padding: 6px 9px;
+            border-radius: 8px;
+            background: #e6f4f1;
+            color: #0f766e;
+            font-weight: 700;
+        }
+
+        .admin-empty {
+            padding: 35px 15px;
+            text-align: center;
+            color: #64748b;
+        }
+
+        .admin-disclaimer {
+            margin-top: 18px;
+            padding: 14px 16px;
+            border-radius: 10px;
+            background: #f7f9fc;
+            color: #64748b;
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .analysis-filter-form {
+            display: grid;
+            grid-template-columns: minmax(200px, 2fr) repeat(2, minmax(150px, 1fr)) auto auto;
+            gap: 12px;
+            align-items: end;
+            margin: 22px 0;
+        }
+
+        .analysis-filter-group label {
+            display: block;
+            margin-bottom: 7px;
+            color: #475569;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .analysis-filter-group input,
+        .analysis-filter-group select {
+            width: 100%;
+            min-height: 42px;
+            padding: 9px 11px;
+            border: 1px solid #dbe3ec;
+            border-radius: 8px;
+            background: #ffffff;
+            color: #334155;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .analysis-filter-group input:focus,
+        .analysis-filter-group select:focus {
+            border-color: #0f766e;
+            box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.1);
+        }
+
+        .analysis-filter-button {
+            min-height: 42px;
+            padding: 0 17px;
+            border: none;
+            border-radius: 8px;
+            background: #172b4d;
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .analysis-reset-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 42px;
+            padding: 0 15px;
+            border: 1px solid #dbe3ec;
+            border-radius: 8px;
+            color: #475569;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .analysis-filter-button:hover {
+            background: #0f766e;
+        }
+
+        .analysis-reset-button:hover {
+            background: #f7f9fc;
+        }
+
+        .analysis-result-count {
+            margin: 0 0 14px;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .analysis-pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding: 18px 0 4px;
+        }
+
+        .analysis-pagination-info {
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .analysis-pagination-links {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .analysis-pagination-links a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 34px;
+            height: 34px;
+            padding: 0 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 7px;
+            color: #475569;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .analysis-pagination-links a:hover,
+        .analysis-pagination-links a.active {
+            background: #172b4d;
+            border-color: #172b4d;
+            color: #ffffff;
+        }
+
+        @media (max-width: 1100px) {
+            .analysis-filter-form {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 600px) {
+            .admin-page-summary {
+                align-items: stretch;
+            }
+
+            .admin-count {
+                width: 100%;
+            }
+
+            .analysis-filter-form {
+                grid-template-columns: 1fr;
+            }
+
+            .analysis-pagination {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+        .analysis-details-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+    border: 1px solid #dbe3ec;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #0f766e;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.analysis-details-link:hover {
+    background: #e6f4f1;
+    border-color: #0f766e;
+}
+    </style>
+</head>
+
+<body>
+<div class="dashboard-layout">
+
+    <aside class="sidebar">
+        <a href="/admin/dashboard" class="brand">
+            <span class="brand-icon">R</span>
+            <span class="brand-name">ResearchLens</span>
+        </a>
+
+        <div class="sidebar-section">
+            <span class="sidebar-label">ADMINISTRATION</span>
+
+            <a href="/admin/dashboard" class="sidebar-link">
+                <span class="nav-icon">▦</span>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="/admin/users" class="sidebar-link">
+                <span class="nav-icon">♙</span>
+                <span>Manage Users</span>
+            </a>
+
+            <a href="/admin/papers" class="sidebar-link">
+                <span class="nav-icon">▤</span>
+                <span>Research Papers</span>
+            </a>
+
+            <a href="/admin/analyses" class="sidebar-link active">
+                <span class="nav-icon">▧</span>
+                <span>Analysis Records</span>
+            </a>
+        </div>
+
+        <div class="sidebar-bottom">
+            <div class="sidebar-help">
+                <div class="help-icon">✦</div>
+                <strong>Manage ResearchLens</strong>
+                <p>Monitor researchers, uploaded papers, and AI-generated reports.</p>
+                <a href="/admin/dashboard">Back to dashboard <span>→</span></a>
+            </div>
+
+            <button id="logoutButton" class="logout-button" type="button">
+                <span class="nav-icon">↪</span>
+                <span>Sign out</span>
+            </button>
+        </div>
+    </aside>
+
+    <main class="main-content">
+
+        <header class="topbar">
+            <div class="page-heading">
+                <span class="page-eyebrow">ADMINISTRATION</span>
+                <h1>Analysis Records</h1>
+                <p class="topbar-subtitle">Monitor AI-generated research paper quality reports.</p>
+            </div>
+
+            <div class="profile-area">
+                <div class="profile-avatar">
+                    {{ (current_admin.display_name or current_admin.email or "A")[0] | upper }}
+                </div>
+                <div class="profile-details">
+                    <strong>{{ current_admin.display_name or "Administrator" }}</strong>
+                    <span>{{ current_admin.email }}</span>
+                </div>
+            </div>
+        </header>
+
+        <section class="admin-page-section">
+
+            <div class="admin-page-summary">
+                <div>
+                    <span class="section-eyebrow">AI ANALYSIS MANAGEMENT</span>
+                    <h2>Research quality reports</h2>
+                    <p>Review analysis results generated for uploaded papers.</p>
+                </div>
+
+                <div class="admin-count">
+                    <span>Total analysis records</span>
+                    <strong>{{ total_analyses }}</strong>
+                </div>
+            </div>
+
+            <section class="content-card">
+                <div class="card-heading">
+                    <div>
+                        <h2>All analysis records</h2>
+                        <p>Paper owners, scores, and report creation dates.</p>
+                    </div>
+                </div>
+
+                <form method="GET" action="/admin/analyses" class="analysis-filter-form">
+
+                    <div class="analysis-filter-group">
+                        <label for="search">Search records</label>
+                        <input
+                            type="text"
+                            id="search"
+                            name="search"
+                            value="{{ search }}"
+                            placeholder="Search paper title, filename or email"
+                        >
+                    </div>
+
+                    <div class="analysis-filter-group">
+                        <label for="score_filter">Quality score</label>
+                        <select id="score_filter" name="score_filter">
+                            <option value="all" {% if score_filter == "all" %}selected{% endif %}>
+                                All scores
+                            </option>
+                            <option value="excellent" {% if score_filter == "excellent" %}selected{% endif %}>
+                                Excellent (80–100)
+                            </option>
+                            <option value="good" {% if score_filter == "good" %}selected{% endif %}>
+                                Good (60–79)
+                            </option>
+                            <option value="needs_improvement" {% if score_filter == "needs_improvement" %}selected{% endif %}>
+                                Needs improvement (below 60)
+                            </option>
+                            <option value="unavailable" {% if score_filter == "unavailable" %}selected{% endif %}>
+                                Score unavailable
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="analysis-filter-group">
+                        <label for="sort_by">Sort by</label>
+                        <select id="sort_by" name="sort_by">
+                            <option value="newest" {% if sort_by == "newest" %}selected{% endif %}>
+                                Newest first
+                            </option>
+                            <option value="oldest" {% if sort_by == "oldest" %}selected{% endif %}>
+                                Oldest first
+                            </option>
+                            <option value="highest_score" {% if sort_by == "highest_score" %}selected{% endif %}>
+                                Highest score
+                            </option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="analysis-filter-button">
+                        Apply
+                    </button>
+
+                    <a href="/admin/analyses" class="analysis-reset-button">
+                        Reset
+                    </a>
+
+                </form>
+
+                <p class="analysis-result-count">
+                    Showing {{ start_item }}–{{ end_item }} of {{ total_filtered }} matching records
+                </p>
+
+                <div class="admin-table-wrap">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Report ID</th>
+                                <th>Research paper</th>
+                                <th>Uploaded by</th>
+                                <th>Overall score</th>
+                                <th>Writing</th>
+                                <th>Methodology</th>
+                                <th>Created on</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for report, paper, user in analyses %}
+                            <tr>
+                                <td>{{ report.id }}</td>
+                                <td>
+                                    <strong>
+                                        {{ paper.paper_title or paper.original_filename }}
+                                    </strong>
+                                </td>
+                                <td>{{ user.email }}</td>
+                                <td>
+                                    {% if report.overall_score is not none %}
+                                        <span class="admin-score">
+                                            {{ report.overall_score }}/100
+                                        </span>
+                                    {% else %}
+                                        Not available
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {{ report.writing_score if report.writing_score is not none else "—" }}
+                                </td>
+                                <td>
+                                    {{ report.methodology_score if report.methodology_score is not none else "—" }}
+                                </td>
+                                <td>
+                                    {{ report.created_at.strftime("%d %b %Y, %I:%M %p") if report.created_at else "Unavailable" }}
+                                </td>
+                                <td>
+    <a
+        href="/admin/analyses/{{ report.id }}"
+        class="analysis-details-link"
+    >
+        View Details →
+    </a>
+</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="7" class="admin-empty">
+                                    No analysis records match your search or filters.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if total_pages > 1 %}
+                <div class="analysis-pagination">
+
+                    <div class="analysis-pagination-info">
+                        Page {{ page }} of {{ total_pages }}
+                    </div>
+
+                    <div class="analysis-pagination-links">
+
+                        {% if previous_url %}
+                        <a href="{{ previous_url }}">Previous</a>
+                        {% endif %}
+
+                        {% for item in page_links %}
+                        <a
+                            href="{{ item.url }}"
+                            class="{% if item.number == page %}active{% endif %}"
+                        >
+                            {{ item.number }}
+                        </a>
+                        {% endfor %}
+
+                        {% if next_url %}
+                        <a href="{{ next_url }}">Next</a>
+                        {% endif %}
+
+                    </div>
+                </div>
+                {% endif %}
+
+            </section>
+
+            <div class="admin-disclaimer">
+                Analysis scores are AI-generated assessments intended to support
+                research-paper improvement. They should not be treated as a
+                substitute for expert academic review.
+            </div>
+
+        </section>
+
+        <footer class="dashboard-footer">
+            <span class="footer-brand">ResearchLens</span>
+            <span>AI Research Paper Quality Analyzer</span>
+        </footer>
+
+    </main>
+</div>
+
+<script src="{{ url_for('static', path='js/dashboard.js') }}" type="module"></script>
+</body>
+</html>

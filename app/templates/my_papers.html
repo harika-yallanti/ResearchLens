@@ -1,0 +1,602 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#172b4d">
+
+    <title>My Papers | ResearchLens</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', path='css/dashboard.css') }}?v=11"
+    >
+
+    <style>
+        .papers-page {
+            width: 100%;
+            padding: 28px 0;
+            box-sizing: border-box;
+        }
+
+        .papers-intro {
+            margin-bottom: 26px;
+        }
+
+        .papers-intro h2 {
+            font-size: 24px;
+            color: #172b4d;
+            margin-bottom: 8px;
+        }
+
+        .papers-intro p {
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .papers-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 22px;
+        }
+
+        .papers-count {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .papers-count strong {
+            color: #172b4d;
+        }
+
+        .papers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            width: 100%;
+        }
+
+        .paper-card {
+            min-width: 0;
+            box-sizing: border-box;
+            background: #ffffff;
+            border: 1px solid #e8edf3;
+            border-radius: 16px;
+            padding: 22px;
+            box-shadow: 0 5px 18px rgba(23, 43, 77, 0.04);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .paper-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 26px rgba(23, 43, 77, 0.08);
+        }
+
+        .paper-card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 18px;
+            min-width: 0;
+        }
+
+        .paper-file-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: #e8f5f3;
+            color: #0f766e;
+            font-size: 23px;
+            flex-shrink: 0;
+        }
+
+        .paper-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 20px;
+            background: #e8f5f3;
+            color: #0f766e;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            max-width: 75%;
+            overflow-wrap: anywhere;
+        }
+
+        .paper-status::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+            flex-shrink: 0;
+        }
+
+        .paper-status.uploaded {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        .paper-status.failed {
+            background: #fff1f2;
+            color: #be123c;
+        }
+
+        .paper-title {
+            color: #172b4d;
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 1.5;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            margin-bottom: 8px;
+        }
+
+        .paper-filename {
+            color: #64748b;
+            font-size: 12px;
+            line-height: 1.5;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            margin-bottom: 18px;
+        }
+
+        .paper-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 14px;
+            color: #64748b;
+            font-size: 12px;
+            padding-top: 14px;
+            border-top: 1px solid #edf1f5;
+        }
+
+        .paper-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .paper-actions form {
+            display: flex;
+            flex: 1 1 140px;
+            min-width: 0;
+        }
+
+        .paper-action {
+            display: inline-flex;
+            flex: 1 1 120px;
+            min-width: 0;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            text-decoration: none;
+            border: 1px solid #dce5ed;
+            border-radius: 9px;
+            padding: 10px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            line-height: 1.4;
+            color: #172b4d;
+            background: #ffffff;
+            cursor: pointer;
+            transition: 0.2s ease;
+            box-sizing: border-box;
+        }
+
+        .paper-actions form .paper-action {
+            width: 100%;
+        }
+
+        .paper-action:hover {
+            border-color: #0f766e;
+            color: #0f766e;
+        }
+
+        .paper-action.primary {
+            background: #0f766e;
+            border-color: #0f766e;
+            color: #ffffff;
+        }
+
+        .paper-action.primary:hover {
+            background: #0b625c;
+        }
+
+        .paper-action:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        .papers-empty {
+            text-align: center;
+            padding: 60px 24px;
+            background: #ffffff;
+            border: 1px dashed #d7e1eb;
+            border-radius: 18px;
+        }
+
+        .papers-empty-icon {
+            width: 68px;
+            height: 68px;
+            margin: 0 auto 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #e8f5f3;
+            color: #0f766e;
+            border-radius: 18px;
+            font-size: 30px;
+        }
+
+        .papers-empty h3 {
+            color: #172b4d;
+            font-size: 19px;
+            margin-bottom: 9px;
+        }
+
+        .papers-empty p {
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.6;
+            max-width: 420px;
+            margin: 0 auto 22px;
+        }
+
+        .papers-empty .primary-button {
+            display: inline-flex;
+            text-decoration: none;
+        }
+
+        .paper-details {
+            margin-top: 14px;
+            padding: 14px;
+            border-radius: 10px;
+            background: #f8fafc;
+            color: #475569;
+            font-size: 13px;
+            line-height: 1.7;
+            overflow-wrap: anywhere;
+        }
+
+        .paper-details summary {
+            cursor: pointer;
+            color: #0f766e;
+            font-weight: 600;
+        }
+
+        .paper-details pre {
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            max-height: 240px;
+            overflow-y: auto;
+            margin-top: 12px;
+            font-family: inherit;
+        }
+
+        @media (max-width: 900px) {
+            .papers-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+        }
+
+        @media (max-width: 700px) {
+            .papers-page {
+                padding: 20px 0;
+            }
+
+            .papers-intro {
+                margin-bottom: 20px;
+            }
+
+            .papers-intro h2 {
+                font-size: 21px;
+            }
+
+            .papers-toolbar {
+                align-items: flex-start;
+            }
+
+            .papers-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .paper-card {
+                padding: 18px;
+            }
+
+            .papers-empty {
+                padding: 40px 18px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .paper-card {
+                padding: 15px;
+            }
+
+            .paper-actions {
+                flex-direction: column;
+            }
+
+            .paper-actions form,
+            .paper-actions .paper-action {
+                width: 100%;
+                flex: 1 1 auto;
+            }
+
+            .papers-empty {
+                padding: 32px 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+{% set account_name = current_user.display_name or "Researcher" %}
+{% set account_email = current_user.email or "Signed in" %}
+{% set avatar_letter = account_name[0] | upper if account_name else "R" %}
+
+<div class="dashboard-layout">
+
+    <aside class="sidebar">
+        <a href="/dashboard" class="brand">
+            <span class="brand-icon">R</span>
+            <span class="brand-name">ResearchLens</span>
+        </a>
+
+        <div class="sidebar-section">
+            <span class="sidebar-label">WORKSPACE</span>
+
+            <a href="/dashboard" class="sidebar-link">
+                <span class="nav-icon">▦</span>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="/upload" class="sidebar-link">
+                <span class="nav-icon">↑</span>
+                <span>Upload Paper</span>
+            </a>
+
+            <a href="/my-papers" class="sidebar-link active">
+                <span class="nav-icon">▤</span>
+                <span>My Papers</span>
+            </a>
+
+            <a href="/reports" class="sidebar-link">
+                <span class="nav-icon">▧</span>
+                <span>Analysis Reports</span>
+            </a>
+
+            <a href="/history" class="sidebar-link">
+                <span class="nav-icon">◷</span>
+                <span>History</span>
+            </a>
+        </div>
+
+        <div class="sidebar-bottom">
+            <div class="sidebar-help">
+                <div class="help-icon">✦</div>
+                <strong>Need research guidance?</strong>
+                <p>
+                    Explore AI-powered insights to improve your paper.
+                </p>
+                <a href="/docs">Explore features →</a>
+            </div>
+
+            <button
+                id="logoutButton"
+                class="logout-button"
+                type="button"
+            >
+                <span class="nav-icon">↪</span>
+                <span>Sign out</span>
+            </button>
+        </div>
+    </aside>
+
+    <main class="main-content">
+
+        <header class="topbar">
+            <div class="page-heading">
+                <span class="page-eyebrow">RESEARCH WORKSPACE</span>
+                <h1>My Papers</h1>
+                <p class="topbar-subtitle">
+                    Manage your uploaded research documents.
+                </p>
+            </div>
+
+            <div class="profile-area">
+                <div class="profile-avatar" id="profileAvatar">
+                    {{ avatar_letter }}
+                </div>
+
+                <div class="profile-details">
+                    <strong id="profileName">
+                        {{ account_name }}
+                    </strong>
+
+                    <span id="profileEmail">
+                        {{ account_email }}
+                    </span>
+                </div>
+            </div>
+        </header>
+
+        <section class="papers-page">
+
+            <div class="papers-intro">
+                <h2>Your research library</h2>
+                <p>
+                    Manage your uploaded research papers and review
+                    their extraction status.
+                </p>
+            </div>
+
+            <div class="papers-toolbar">
+                <div class="papers-count">
+                    You have
+                    <strong>{{ papers|length }}</strong>
+                    uploaded paper(s).
+                </div>
+
+                <a href="/upload" class="primary-button">
+                    <span>＋</span>
+                    Upload Paper
+                </a>
+            </div>
+
+            {% if papers %}
+
+                <div class="papers-grid">
+
+                    {% for paper in papers %}
+
+                        <article class="paper-card">
+
+                            <div class="paper-card-top">
+                                <div class="paper-file-icon">▤</div>
+
+                                <span class="paper-status
+                                    {% if paper.processing_status == 'uploaded' %}
+                                        uploaded
+                                    {% elif paper.processing_status == 'failed' %}
+                                        failed
+                                    {% endif %}">
+                                    {{ paper.processing_status }}
+                                </span>
+                            </div>
+
+                            <h3 class="paper-title">
+                                {{ paper.original_filename }}
+                            </h3>
+
+                            <p class="paper-filename">
+                                {{ paper.stored_filename }}
+                            </p>
+
+                            <div class="paper-meta">
+                                <span>{{ paper.file_type|upper }}</span>
+
+                                <span>
+                                    {{ "%.2f"|format(paper.file_size / 1024) }} KB
+                                </span>
+
+                                <span>
+                                    {{ paper.uploaded_at.strftime("%d %b %Y, %I:%M %p") }}
+                                </span>
+                            </div>
+
+                            {% if paper.extracted_text %}
+
+                                <details class="paper-details">
+                                    <summary>View extracted text</summary>
+                                    <pre>{{ paper.extracted_text }}</pre>
+                                </details>
+
+                            {% else %}
+
+                                <div class="paper-details">
+                                    Text extraction is not available for this paper.
+                                </div>
+
+                            {% endif %}
+
+                            <div class="paper-actions">
+
+                                {% if paper.extracted_text %}
+
+                                    <form
+                                        action="/analyze/{{ paper.id }}"
+                                        method="POST"
+                                    >
+                                        <button
+                                            type="submit"
+                                            class="paper-action primary"
+                                        >
+                                            ✦ Analyze Paper
+                                        </button>
+                                    </form>
+
+                                {% else %}
+
+                                    <button
+                                        type="button"
+                                        class="paper-action"
+                                        disabled
+                                    >
+                                        Text unavailable
+                                    </button>
+
+                                {% endif %}
+
+                                <a href="/upload" class="paper-action primary">
+                                    Upload another
+                                </a>
+
+                            </div>
+
+                        </article>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <div class="papers-empty">
+                    <div class="papers-empty-icon">▤</div>
+
+                    <h3>Your research library is empty</h3>
+
+                    <p>
+                        You haven't uploaded any research papers yet.
+                        Upload a PDF or DOCX document to get started
+                        with ResearchLens.
+                    </p>
+
+                    <a href="/upload" class="primary-button">
+                        <span>＋</span>
+                        Upload your first paper
+                    </a>
+                </div>
+
+            {% endif %}
+
+        </section>
+
+        <footer class="dashboard-footer">
+            <span class="footer-brand">ResearchLens</span>
+            <span>AI Research Paper Quality Analyzer</span>
+        </footer>
+
+    </main>
+</div>
+
+<script
+    type="module"
+    src="{{ url_for('static', path='js/dashboard.js') }}"
+></script>
+
+</body>
+</html>

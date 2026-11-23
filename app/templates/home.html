@@ -1,0 +1,103 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{{ app_name }}</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
+</head>
+<body>
+    <header class="navbar">
+        <div class="brand">
+            <span class="brand-icon">R</span>
+            <span>ResearchLens</span>
+        </div>
+
+        <a href="/docs" class="nav-link">API Docs</a>
+    </header>
+
+    <main class="hero">
+        <div class="hero-content">
+            <span class="eyebrow">AI-POWERED RESEARCH ANALYSIS</span>
+
+            <h1>
+                Make your research paper
+                <span>stronger and clearer.</span>
+            </h1>
+
+            <p>
+                Evaluate your academic paper's structure, writing quality,
+                methodology, and references with AI-powered insights.
+            </p>
+
+            <div class="hero-actions">
+                <a href="/docs" class="primary-button">
+                    Explore the API
+                </a>
+
+                <a href="/health" class="secondary-button">
+                    Check Application
+                </a>
+            </div>
+        </div>
+
+        <div class="hero-card">
+            <div class="card-top">
+                <div>
+                    <span class="small-label">PAPER ANALYSIS</span>
+                    <h2>Quality Overview</h2>
+                </div>
+
+                <span class="status-dot"></span>
+            </div>
+
+            <div class="score-circle">
+                <div>
+                    <strong>--</strong>
+                    <span>Quality Score</span>
+                </div>
+            </div>
+
+            <div class="analysis-list">
+                <div class="analysis-item">
+                    <span class="analysis-icon">✓</span>
+                    <div>
+                        <strong>Structure Analysis</strong>
+                        <small>Evaluate paper organization</small>
+                    </div>
+                </div>
+
+                <div class="analysis-item">
+                    <span class="analysis-icon">✦</span>
+                    <div>
+                        <strong>Writing Quality</strong>
+                        <small>Improve clarity and readability</small>
+                    </div>
+                </div>
+
+                <div class="analysis-item">
+                    <span class="analysis-icon">⌁</span>
+                    <div>
+                        <strong>Reference Review</strong>
+                        <small>Check citation consistency</small>
+                    </div>
+                </div>
+            </div>
+
+            <p class="demo-note">
+                Your analysis results will appear here after we implement
+                the paper upload and analysis features.
+            </p>
+        </div>
+    </main>
+
+    <footer>
+        <p>ResearchLens · AI Research Paper Quality Analyzer</p>
+    </footer>
+
+    <script src="{{ url_for('static', path='js/main.js') }}"></script>
+</body>
+</html>

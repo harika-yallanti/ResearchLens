@@ -1,0 +1,354 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Login | ResearchLens</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', path='css/auth.css') }}?v=4">
+</head>
+<body>
+    <main class="auth-page">
+
+        <section class="intro-panel">
+
+            <a href="/" class="brand">
+                <span class="brand-mark">R</span>
+                <span>ResearchLens</span>
+            </a>
+
+            <div class="intro-content">
+
+                <span class="intro-label">YOUR RESEARCH, REFINED</span>
+
+                <h1>
+                    Turn your research
+                    <span>into stronger work.</span>
+                </h1>
+
+                <p>
+                    An intelligent research paper quality analyzer designed
+                    to help researchers improve clarity, structure,
+                    methodology, and academic writing.
+                </p>
+
+                <div class="feature-list">
+
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <div>
+                            <strong>Research structure analysis</strong>
+                            <p>Identify missing sections and structural gaps.</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <span class="feature-icon">✦</span>
+                        <div>
+                            <strong>AI writing insights</strong>
+                            <p>Improve clarity, grammar, and readability.</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <span class="feature-icon">⌁</span>
+                        <div>
+                            <strong>Citation consistency</strong>
+                            <p>Review references and citation formatting.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="intro-footer">
+                Intelligent insights for better academic research.
+            </div>
+
+        </section>
+
+        <section class="form-panel">
+
+            <div class="mobile-brand">
+                <span class="brand-mark">R</span>
+                <span>ResearchLens</span>
+            </div>
+
+            <div class="auth-card">
+
+                <div class="form-heading">
+
+                    <span class="form-eyebrow" id="formEyebrow">
+                        WELCOME BACK
+                    </span>
+
+                    <h2 id="formTitle">
+                        Sign in to your account
+                    </h2>
+
+                    <p id="formSubtitle">
+                        Continue your research journey with ResearchLens.
+                    </p>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="google-button"
+                    id="googleButton"
+                >
+                    <svg viewBox="0 0 48 48" aria-hidden="true">
+                        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.73 7.18l7.62 5.91c4.45-4.11 7.15-10.17 7.15-17.56z"/>
+                        <path fill="#FBBC05" d="M10.53 28.59A14.4 14.4 0 0 1 9.75 24c0-1.59.27-3.13.76-4.59l-7.98-6.19A23.9 23.9 0 0 0 0 24c0 3.87.93 7.52 2.56 10.78l7.97-6.19z"/>
+                        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.9-5.89l-7.62-5.91c-2.12 1.42-4.83 2.27-8.28 2.27-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                    </svg>
+
+                    <span>Continue with Google</span>
+                </button>
+
+                <div class="separator">
+                    <span></span>
+                    <p>or continue with email</p>
+                    <span></span>
+                </div>
+
+                <form id="authForm">
+
+                    <div class="field-group" id="nameGroup">
+
+                        <label for="fullName">Full name</label>
+
+                        <input
+                            type="text"
+                            id="fullName"
+                            name="fullName"
+                            placeholder="Enter your full name"
+                            autocomplete="name"
+                        >
+
+                    </div>
+
+                    <div class="field-group">
+
+                        <label for="email">Email address</label>
+
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            placeholder="you@example.com"
+                            autocomplete="email"
+                            required
+                        >
+
+                    </div>
+
+                    <div class="field-group">
+
+                        <div class="label-row">
+
+                            <label for="password">Password</label>
+
+                            <button
+                                type="button"
+                                class="text-button"
+                                id="forgotPassword"
+                            >
+                                Forgot password?
+                            </button>
+
+                        </div>
+
+                        <div class="password-wrapper">
+
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                placeholder="Enter your password"
+                                autocomplete="current-password"
+                                required
+                            >
+
+                            <button
+                                type="button"
+                                class="password-toggle"
+                                data-target="password"
+                                aria-label="Show password"
+                            >
+                                <svg viewBox="0 0 24 24" class="eye-icon">
+                                    <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <div class="field-group" id="confirmPasswordGroup">
+
+                        <label for="confirmPassword">
+                            Confirm password
+                        </label>
+
+                        <div class="password-wrapper">
+
+                            <input
+                                type="password"
+                                id="confirmPassword"
+                                name="confirmPassword"
+                                placeholder="Re-enter your password"
+                                autocomplete="new-password"
+                            >
+
+                            <button
+                                type="button"
+                                class="password-toggle"
+                                data-target="confirmPassword"
+                                aria-label="Show confirm password"
+                            >
+                                <svg viewBox="0 0 24 24" class="eye-icon">
+                                    <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <div
+                        class="form-message"
+                        id="formMessage"
+                        role="status"
+                    ></div>
+
+                    <button
+                        type="submit"
+                        class="submit-button"
+                        id="submitButton"
+                    >
+                        Sign in
+                    </button>
+
+                </form>
+
+                <div
+                    class="otp-section"
+                    id="otpSection"
+                    style="display: none;"
+                >
+
+                    <div class="otp-icon">
+
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <rect x="3" y="5" width="18" height="14" rx="3"/>
+                            <path d="m3 7 9 6 9-6"/>
+                        </svg>
+
+                    </div>
+
+                    <h3>Verify your email address</h3>
+
+                    <p class="otp-description">
+                        We have sent a six-digit verification code to
+                        <strong id="otpEmail"></strong>.
+                        Enter the code below to complete your login.
+                    </p>
+
+                    <form id="otpForm">
+
+                        <label for="otpInput">
+                            Verification code
+                        </label>
+
+                        <input
+                            type="text"
+                            id="otpInput"
+                            name="otp"
+                            placeholder="Enter 6-digit code"
+                            maxlength="6"
+                            minlength="6"
+                            inputmode="numeric"
+                            autocomplete="one-time-code"
+                            pattern="[0-9]{6}"
+                            required
+                        >
+
+                        <div
+                            id="otpMessage"
+                            class="form-message"
+                            role="status"
+                        ></div>
+
+                        <button
+                            type="submit"
+                            id="otpVerifyButton"
+                            class="otp-verify-button"
+                        >
+                            Verify and continue
+                        </button>
+
+                    </form>
+
+                    <div class="otp-resend-area">
+
+                        <span>Didn't receive the code?</span>
+
+                        <button
+                            type="button"
+                            id="resendOtpButton"
+                            disabled
+                        >
+                            Resend code in 60s
+                        </button>
+
+                    </div>
+
+                    <button
+                        type="button"
+                        id="backToLogin"
+                        class="otp-back-button"
+                    >
+                        Back to sign in
+                    </button>
+
+                </div>
+
+                <div class="switch-form">
+
+                    <span id="switchText">
+                        Don't have an account?
+                    </span>
+
+                    <button
+                        type="button"
+                        class="text-button"
+                        id="switchMode"
+                    >
+                        Create account
+                    </button>
+
+                </div>
+
+            </div>
+
+            <p class="form-footer">
+                By continuing, you agree to use ResearchLens responsibly.
+            </p>
+
+        </section>
+
+    </main>
+
+    <script
+        type="module"
+        src="{{ url_for('static', path='js/auth.js') }}?v=3"
+    ></script>
+
+</body>
+</html>

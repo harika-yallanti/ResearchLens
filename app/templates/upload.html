@@ -1,0 +1,461 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#172b4d">
+
+    <title>Upload Paper | ResearchLens</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', path='css/dashboard.css') }}?v=11"
+    >
+
+    <style>
+        .upload-page {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            box-sizing: border-box;
+        }
+
+        .upload-intro {
+            margin-bottom: 28px;
+        }
+
+        .upload-intro h2 {
+            margin-bottom: 8px;
+            color: #172b4d;
+        }
+
+        .upload-intro p {
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        .upload-card {
+            width: 100%;
+            box-sizing: border-box;
+            background: #ffffff;
+            border: 1px solid #e5eaf0;
+            border-radius: 18px;
+            padding: 32px;
+            box-shadow: 0 8px 28px rgba(23, 43, 77, 0.05);
+        }
+
+        .drop-area {
+            border: 2px dashed #cbd5e1;
+            border-radius: 16px;
+            padding: 42px 24px;
+            text-align: center;
+            background: #f8fafc;
+            transition: 0.2s ease;
+        }
+
+        .drop-area:hover {
+            border-color: #0f766e;
+            background: #f0fdfa;
+        }
+
+        .upload-icon {
+            width: 58px;
+            height: 58px;
+            margin: 0 auto 16px;
+            display: grid;
+            place-items: center;
+            border-radius: 16px;
+            background: #ccfbf1;
+            color: #0f766e;
+            font-size: 28px;
+        }
+
+        .drop-area h3 {
+            margin-bottom: 8px;
+            color: #172b4d;
+        }
+
+        .drop-area p {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 18px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .choose-file-button {
+            display: inline-block;
+            padding: 11px 20px;
+            border-radius: 10px;
+            background: #0f766e;
+            color: #ffffff;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .selected-file {
+            margin-top: 18px;
+            color: #172b4d;
+            font-size: 14px;
+            overflow-wrap: anywhere;
+        }
+
+        .upload-guidelines {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 20px 0;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .upload-guidelines span {
+            background: #f1f5f9;
+            padding: 8px 12px;
+            border-radius: 8px;
+        }
+
+        .keyword-section {
+            margin: 26px 0 22px;
+        }
+
+        .keyword-section label {
+            display: block;
+            margin-bottom: 9px;
+            color: #172b4d;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .keyword-section textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 13px 15px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            outline: none;
+            resize: vertical;
+            font-family: inherit;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #172b4d;
+            background: #ffffff;
+            box-sizing: border-box;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .keyword-section textarea:focus {
+            border-color: #0f766e;
+            box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.10);
+        }
+
+        .keyword-help {
+            margin-top: 8px;
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .upload-submit {
+            width: 100%;
+            border: none;
+            border-radius: 11px;
+            padding: 14px;
+            background: #172b4d;
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .upload-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .upload-message {
+            margin-bottom: 20px;
+            padding: 14px 16px;
+            border-radius: 10px;
+            line-height: 1.5;
+        }
+
+        .upload-message.success {
+            background: #ecfdf5;
+            color: #047857;
+        }
+
+        .upload-message.error {
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+
+        @media (max-width: 600px) {
+            .upload-page {
+                padding: 0;
+            }
+
+            .upload-intro {
+                margin-bottom: 20px;
+            }
+
+            .upload-intro h2 {
+                font-size: 22px;
+            }
+
+            .upload-card {
+                padding: 20px;
+                border-radius: 14px;
+            }
+
+            .drop-area {
+                padding: 30px 16px;
+            }
+
+            .upload-guidelines {
+                gap: 8px;
+            }
+
+            .upload-guidelines span {
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .upload-card {
+                padding: 16px;
+            }
+
+            .drop-area {
+                padding: 26px 12px;
+            }
+
+            .choose-file-button {
+                padding: 10px 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-layout">
+
+        <aside class="sidebar">
+            <a href="/dashboard" class="brand">
+                <span class="brand-icon">R</span>
+                <span class="brand-name">ResearchLens</span>
+            </a>
+
+            <div class="sidebar-section">
+                <span class="sidebar-label">WORKSPACE</span>
+
+                <a href="/dashboard" class="sidebar-link">
+                    <span class="nav-icon">▦</span>
+                    <span>Dashboard</span>
+                </a>
+
+                <a href="/upload" class="sidebar-link active">
+                    <span class="nav-icon">↑</span>
+                    <span>Upload Paper</span>
+                </a>
+
+                <a href="/my-papers" class="sidebar-link">
+                    <span class="nav-icon">▤</span>
+                    <span>My Papers</span>
+                </a>
+
+                <a href="/reports" class="sidebar-link">
+                    <span class="nav-icon">▧</span>
+                    <span>Analysis Reports</span>
+                </a>
+
+                <a href="/history" class="sidebar-link">
+                    <span class="nav-icon">◷</span>
+                    <span>History</span>
+                </a>
+            </div>
+
+            <div class="sidebar-bottom">
+                <button
+                    id="logoutButton"
+                    class="logout-button"
+                    type="button"
+                >
+                    <span class="nav-icon">↪</span>
+                    <span>Sign out</span>
+                </button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+
+            <header class="topbar">
+                <div class="page-heading">
+                    <span class="page-eyebrow">RESEARCH WORKSPACE</span>
+                    <h1>Upload Paper</h1>
+                </div>
+            </header>
+
+            <section class="upload-page">
+
+                <div class="upload-intro">
+                    <h2>Analyze your research paper</h2>
+                    <p>
+                        Upload your research document to begin reviewing
+                        its structure, writing quality, methodology,
+                        and references.
+                    </p>
+                </div>
+
+                {% if success_message %}
+                    <div class="upload-message success">
+                        {{ success_message }}
+                    </div>
+                {% endif %}
+
+                {% if error_message %}
+                    <div class="upload-message error">
+                        {{ error_message }}
+                    </div>
+                {% endif %}
+
+                <div class="upload-card">
+
+                    <form
+                        action="/upload"
+                        method="POST"
+                        enctype="multipart/form-data"
+                        id="uploadForm"
+                    >
+
+                        <div class="drop-area">
+                            <div class="upload-icon">↑</div>
+
+                            <h3>Choose your research document</h3>
+
+                            <p>
+                                Select a PDF or DOCX file from your computer.
+                            </p>
+
+                            <label
+                                for="paperFile"
+                                class="choose-file-button"
+                            >
+                                Choose file
+                            </label>
+
+                            <input
+                                type="file"
+                                id="paperFile"
+                                name="file"
+                                class="file-input"
+                                accept=".pdf,.docx"
+                            >
+
+                            <div
+                                class="selected-file"
+                                id="selectedFile"
+                            >
+                                No file selected
+                            </div>
+                        </div>
+
+                        <div class="upload-guidelines">
+                            <span>PDF or DOCX</span>
+                            <span>Maximum file size: 15 MB</span>
+                            <span>Research papers only</span>
+                        </div>
+
+                        <div class="keyword-section">
+                            <label for="manualKeywords">
+                                Research Paper Keywords
+                                <span style="font-weight: 400; color: #64748b;">
+                                    (Optional)
+                                </span>
+                            </label>
+
+                            <textarea
+                                id="manualKeywords"
+                                name="manual_keywords"
+                                placeholder="Enter your keywords separated by commas. Example: Machine Learning, Deep Learning, Neural Networks"
+                            ></textarea>
+
+                            <p class="keyword-help">
+                                Enter keywords manually if you have them.
+                                If you leave this field blank, ResearchLens
+                                will use AI to extract keywords from your paper.
+                            </p>
+                        </div>
+
+                        <button
+                            type="submit"
+                            class="upload-submit"
+                            id="uploadButton"
+                        >
+                            Upload Research Paper
+                        </button>
+
+                    </form>
+                </div>
+
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        const paperFile = document.getElementById("paperFile");
+        const selectedFile = document.getElementById("selectedFile");
+        const uploadForm = document.getElementById("uploadForm");
+        const uploadButton = document.getElementById("uploadButton");
+
+        paperFile.addEventListener("change", () => {
+            const file = paperFile.files[0];
+
+            selectedFile.textContent = file
+                ? `${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`
+                : "No file selected";
+        });
+
+        uploadForm.addEventListener("submit", (event) => {
+            const file = paperFile.files[0];
+
+            if (!file) {
+                event.preventDefault();
+                alert("Please select a research paper.");
+                return;
+            }
+
+            const allowedExtensions = [".pdf", ".docx"];
+            const fileName = file.name.toLowerCase();
+
+            if (!allowedExtensions.some(extension => fileName.endsWith(extension))) {
+                event.preventDefault();
+                alert("Only PDF and DOCX files are supported.");
+                return;
+            }
+
+            if (file.size > 15 * 1024 * 1024) {
+                event.preventDefault();
+                alert("The file must not exceed 15 MB.");
+                return;
+            }
+
+            uploadButton.disabled = true;
+            uploadButton.textContent = "Uploading and extracting text...";
+        });
+    </script>
+
+    <script
+        type="module"
+        src="{{ url_for('static', path='js/dashboard.js') }}"
+    ></script>
+</body>
+</html>

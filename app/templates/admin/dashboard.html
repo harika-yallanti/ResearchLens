@@ -1,0 +1,569 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#172b4d">
+
+    <title>Admin Dashboard | ResearchLens</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', path='css/dashboard.css') }}?v=12"
+    >
+
+    <style>
+        .admin-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 18px;
+            margin-top: 22px;
+        }
+
+        .admin-stat-card {
+            min-width: 0;
+        }
+
+        .admin-status-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+            margin-top: 18px;
+        }
+
+        .admin-status-card {
+            padding: 20px;
+            background: #f7f9fc;
+            border-radius: 12px;
+        }
+
+        .admin-status-card strong {
+            display: block;
+            font-size: 25px;
+            color: #172b4d;
+            margin-bottom: 6px;
+        }
+
+        .admin-status-card span {
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .admin-record-list {
+            margin-top: 12px;
+        }
+
+        .admin-record {
+            padding: 15px 0;
+            border-bottom: 1px solid #edf1f5;
+        }
+
+        .admin-record:last-child {
+            border-bottom: none;
+        }
+
+        .admin-record strong {
+            display: block;
+            font-size: 14px;
+            color: #172b4d;
+            overflow-wrap: anywhere;
+        }
+
+        .admin-record p {
+            margin-top: 5px;
+            color: #64748b;
+            font-size: 13px;
+            overflow-wrap: anywhere;
+        }
+
+        .admin-role {
+            display: inline-block;
+            margin-top: 7px;
+            padding: 4px 9px;
+            border-radius: 20px;
+            background: #e6f4f1;
+            color: #0f766e;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .admin-empty {
+            padding: 22px 0;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .admin-disclaimer {
+            margin-top: 18px;
+            padding: 14px 16px;
+            border-radius: 10px;
+            background: #f7f9fc;
+            color: #64748b;
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .admin-section {
+            margin-bottom: 24px;
+        }
+
+        .admin-two-column {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 20px;
+        }
+
+        .admin-two-column > * {
+            min-width: 0;
+        }
+
+        @media (max-width: 1250px) {
+            .admin-stats-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 900px) {
+            .admin-two-column {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .admin-stats-grid,
+            .admin-status-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="dashboard-layout">
+
+    <aside class="sidebar">
+
+        <a href="/admin/dashboard" class="brand">
+            <span class="brand-icon">R</span>
+            <span class="brand-name">ResearchLens</span>
+        </a>
+
+        <div class="sidebar-section">
+            <span class="sidebar-label">ADMINISTRATION</span>
+
+            <a href="/admin/dashboard" class="sidebar-link active">
+                <span class="nav-icon">▦</span>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="/admin/users" class="sidebar-link">
+                <span class="nav-icon">♙</span>
+                <span>Manage Users</span>
+            </a>
+
+            <a href="/admin/papers" class="sidebar-link">
+                <span class="nav-icon">▤</span>
+                <span>Research Papers</span>
+            </a>
+
+            <a href="/admin/analyses" class="sidebar-link">
+                <span class="nav-icon">▧</span>
+                <span>Analysis Records</span>
+            </a>
+        </div>
+
+        <div class="sidebar-bottom">
+
+            <div class="sidebar-help">
+                <div class="help-icon">✦</div>
+
+                <strong>Manage ResearchLens</strong>
+
+                <p>
+                    Monitor researchers, uploaded papers,
+                    and AI-generated analysis reports.
+                </p>
+
+                <a href="/admin/users">
+                    Manage users <span>→</span>
+                </a>
+            </div>
+
+            <button
+                id="logoutButton"
+                class="logout-button"
+                type="button"
+            >
+                <span class="nav-icon">↪</span>
+                <span>Sign out</span>
+            </button>
+
+        </div>
+
+    </aside>
+
+    <main class="main-content">
+
+        <header class="topbar">
+
+            <div class="page-heading">
+                <span class="page-eyebrow">ADMINISTRATION</span>
+                <h1>Admin Dashboard</h1>
+                <p class="topbar-subtitle">
+                    Manage and monitor your ResearchLens platform.
+                </p>
+            </div>
+
+            <div class="profile-area">
+
+                <div class="profile-avatar" id="profileAvatar">
+                    {{ (current_admin.display_name or current_admin.email or "A")[0] | upper }}
+                </div>
+
+                <div class="profile-details">
+                    <strong id="profileName">
+                        {{ current_admin.display_name or "Administrator" }}
+                    </strong>
+
+                    <span id="profileEmail">
+                        {{ current_admin.email }}
+                    </span>
+                </div>
+
+            </div>
+
+        </header>
+
+        <section class="welcome-section">
+
+            <div class="welcome-content">
+
+                <span class="welcome-badge">
+                    <span class="welcome-dot"></span>
+                    RESEARCHLENS ADMINISTRATION
+                </span>
+
+                <h2>
+                    Welcome back,
+                    <span id="welcomeName">
+                        {{ (current_admin.display_name or "Administrator").split(" ")[0] }}
+                    </span>
+                </h2>
+
+                <p>
+                    Monitor users, research papers, AI analyses,
+                    and similarity checks from one place.
+                </p>
+
+                <a href="/admin/users" class="primary-button">
+                    <span class="button-plus">＋</span>
+                    Manage platform users
+                    <span class="button-arrow">→</span>
+                </a>
+
+            </div>
+
+            <div class="welcome-decoration" aria-hidden="true">
+                <div class="decoration-orbit orbit-one"></div>
+                <div class="decoration-orbit orbit-two"></div>
+                <div class="decoration-orbit orbit-three"></div>
+                <div class="decoration-center">R</div>
+                <span class="decoration-star star-one">✦</span>
+                <span class="decoration-star star-two">✧</span>
+                <span class="decoration-star star-three">✦</span>
+            </div>
+
+        </section>
+
+        <section class="overview-section admin-section">
+
+            <div class="section-heading">
+                <div>
+                    <span class="section-eyebrow">PLATFORM OVERVIEW</span>
+                    <h2>ResearchLens statistics</h2>
+                    <p>Overall platform activity at a glance.</p>
+                </div>
+            </div>
+
+            <div class="admin-stats-grid">
+
+                <article class="stat-card admin-stat-card">
+
+                    <div class="stat-top">
+                        <div class="stat-icon papers-icon">♙</div>
+                        <span class="stat-label">TOTAL USERS</span>
+                    </div>
+
+                    <strong class="stat-number">
+                        {{ total_users }}
+                    </strong>
+
+                    <span class="stat-description">
+                        {{ total_researchers }} researchers
+                    </span>
+
+                    <div class="stat-accent papers-accent"></div>
+
+                </article>
+
+                <article class="stat-card admin-stat-card">
+
+                    <div class="stat-top">
+                        <div class="stat-icon analyzed-icon">▤</div>
+                        <span class="stat-label">RESEARCH PAPERS</span>
+                    </div>
+
+                    <strong class="stat-number">
+                        {{ total_papers }}
+                    </strong>
+
+                    <span class="stat-description">
+                        Uploaded papers
+                    </span>
+
+                    <div class="stat-accent analyzed-accent"></div>
+
+                </article>
+
+                <article class="stat-card admin-stat-card">
+
+                    <div class="stat-top">
+                        <div class="stat-icon reports-icon">▧</div>
+                        <span class="stat-label">AI ANALYSES</span>
+                    </div>
+
+                    <strong class="stat-number">
+                        {{ total_reports }}
+                    </strong>
+
+                    <span class="stat-description">
+                        Analysis reports generated
+                    </span>
+
+                    <div class="stat-accent reports-accent"></div>
+
+                </article>
+
+                <article class="stat-card admin-stat-card">
+
+                    <div class="stat-top">
+                        <div class="stat-icon reports-icon">⌕</div>
+                        <span class="stat-label">SIMILARITY CHECKS</span>
+                    </div>
+
+                    <strong class="stat-number">
+                        {{ total_plagiarism_checks }}
+                    </strong>
+
+                    <span class="stat-description">
+                        OpenAlex checks
+                    </span>
+
+                    <div class="stat-accent reports-accent"></div>
+
+                </article>
+
+            </div>
+
+        </section>
+
+        <section class="content-card admin-section">
+
+            <div class="card-heading">
+                <div>
+                    <span class="section-eyebrow">CHECK STATUS</span>
+                    <h2>Similarity check overview</h2>
+                    <p>Summary of similarity-check processing.</p>
+                </div>
+            </div>
+
+            <div class="admin-status-grid">
+
+                <div class="admin-status-card">
+                    <strong>{{ completed_checks }}</strong>
+                    <span>Completed checks</span>
+                </div>
+
+                <div class="admin-status-card">
+                    <strong>{{ failed_checks }}</strong>
+                    <span>Failed checks</span>
+                </div>
+
+                <div class="admin-status-card">
+                    <strong>
+                        {{ total_plagiarism_checks - completed_checks - failed_checks }}
+                    </strong>
+                    <span>Pending / Other</span>
+                </div>
+
+            </div>
+
+            <div class="admin-disclaimer">
+                Similarity results are experimental indicators based on
+                accessible scholarly abstracts. They do not establish
+                plagiarism or prove originality. Manual review is required.
+            </div>
+
+        </section>
+
+        <section class="admin-two-column admin-section">
+
+            <article class="content-card">
+
+                <div class="card-heading">
+                    <div>
+                        <span class="section-eyebrow">USER ACTIVITY</span>
+                        <h2>Recently registered users</h2>
+                        <p>Latest researcher and administrator accounts.</p>
+                    </div>
+                </div>
+
+                <div class="admin-record-list">
+
+                    {% for user in recent_users %}
+
+                        <div class="admin-record">
+
+                            <strong>
+                                {{ user.display_name or "Researcher" }}
+                            </strong>
+
+                            <p>{{ user.email }}</p>
+
+                            <span class="admin-role">
+                                {% if user.is_admin %}
+                                    Administrator
+                                {% else %}
+                                    Researcher
+                                {% endif %}
+                            </span>
+
+                            <p>
+                                {{ user.created_at.strftime("%d %b %Y") if user.created_at else "Date unavailable" }}
+                            </p>
+
+                        </div>
+
+                    {% else %}
+
+                        <p class="admin-empty">
+                            No users registered yet.
+                        </p>
+
+                    {% endfor %}
+
+                </div>
+
+            </article>
+
+            <article class="content-card">
+
+                <div class="card-heading">
+                    <div>
+                        <span class="section-eyebrow">UPLOAD ACTIVITY</span>
+                        <h2>Recently uploaded papers</h2>
+                        <p>Latest research papers uploaded to the platform.</p>
+                    </div>
+                </div>
+
+                <div class="admin-record-list">
+
+                    {% for paper, user in recent_papers %}
+
+                        <div class="admin-record">
+
+                            <strong>
+                                {{ paper.paper_title or paper.original_filename }}
+                            </strong>
+
+                            <p>{{ user.email }}</p>
+
+                            <p>
+                                Status: {{ paper.processing_status or "Unknown" }}
+                            </p>
+
+                            <p>
+                                {{ paper.uploaded_at.strftime("%d %b %Y") if paper.uploaded_at else "Date unavailable" }}
+                            </p>
+
+                        </div>
+
+                    {% else %}
+
+                        <p class="admin-empty">
+                            No papers uploaded yet.
+                        </p>
+
+                    {% endfor %}
+
+                </div>
+
+            </article>
+
+        </section>
+
+        <section class="content-card admin-section">
+
+            <div class="card-heading">
+                <div>
+                    <span class="section-eyebrow">AI ACTIVITY</span>
+                    <h2>Recent AI analysis records</h2>
+                    <p>Latest quality assessment reports generated by ResearchLens.</p>
+                </div>
+            </div>
+
+            <div class="admin-record-list">
+
+                {% for report, paper, user in recent_reports %}
+
+                    <div class="admin-record">
+
+                        <strong>
+                            {{ paper.paper_title or paper.original_filename }}
+                        </strong>
+
+                        <p>{{ user.email }}</p>
+
+                        <p>
+                            Overall Score:
+                            {{ report.overall_score if report.overall_score is not none else "Not available" }}
+                            / 100
+                        </p>
+
+                        <p>
+                            {{ report.created_at.strftime("%d %b %Y, %I:%M %p") if report.created_at else "Date unavailable" }}
+                        </p>
+
+                    </div>
+
+                {% else %}
+
+                    <p class="admin-empty">
+                        No analysis records available.
+                    </p>
+
+                {% endfor %}
+
+            </div>
+
+        </section>
+
+        <footer class="dashboard-footer">
+            <span class="footer-brand">ResearchLens</span>
+            <span>AI Research Paper Quality Analyzer</span>
+        </footer>
+
+    </main>
+
+</div>
+
+<script src="{{ url_for('static', path='js/dashboard.js') }}" type="module"></script>
+
+</body>
+</html>

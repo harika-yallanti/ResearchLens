@@ -1,0 +1,774 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#172b4d">
+
+    <title>History | ResearchLens</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', path='css/dashboard.css') }}?v=11">
+
+    <style>
+        .history-page {
+            padding: 28px 0;
+        }
+
+        .history-intro {
+            margin-bottom: 24px;
+        }
+
+        .history-intro h2 {
+            color: #172b4d;
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .history-intro p {
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .history-stats {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+
+        .history-stat-card {
+            background: #ffffff;
+            border: 1px solid #e8edf3;
+            border-radius: 15px;
+            padding: 22px;
+            box-shadow: 0 5px 18px rgba(23, 43, 77, 0.04);
+        }
+
+        .history-stat-label {
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .history-stat-value {
+            color: #172b4d;
+            font-size: 29px;
+            font-weight: 750;
+        }
+
+        .history-stat-description {
+            color: #94a3b8;
+            font-size: 12px;
+            margin-top: 6px;
+        }
+
+        .history-stat-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            background: #e8f5f3;
+            color: #0f766e;
+            border-radius: 10px;
+            font-size: 18px;
+            margin-bottom: 13px;
+        }
+
+        .history-controls {
+            display: grid;
+            grid-template-columns: minmax(200px, 1.5fr) minmax(140px, 1fr) minmax(140px, 1fr) auto;
+            gap: 12px;
+            align-items: end;
+            background: #ffffff;
+            border: 1px solid #e8edf3;
+            border-radius: 15px;
+            padding: 19px;
+            margin-bottom: 22px;
+            box-shadow: 0 5px 18px rgba(23, 43, 77, 0.04);
+        }
+
+        .history-field label {
+            display: block;
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .history-field input,
+        .history-field select {
+            width: 100%;
+            height: 43px;
+            padding: 0 12px;
+            border: 1px solid #dbe3ed;
+            border-radius: 9px;
+            background: #ffffff;
+            color: #172b4d;
+            font-family: inherit;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .history-field input:focus,
+        .history-field select:focus {
+            border-color: #0f766e;
+            box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.09);
+        }
+
+        .history-filter-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .history-apply,
+        .history-clear {
+            height: 43px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 15px;
+            border-radius: 9px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .history-apply {
+            border: none;
+            background: #0f766e;
+            color: #ffffff;
+        }
+
+        .history-apply:hover {
+            background: #115e59;
+        }
+
+        .history-clear {
+            border: 1px solid #dbe3ed;
+            background: #ffffff;
+            color: #475569;
+        }
+
+        .history-section {
+            background: #ffffff;
+            border: 1px solid #e8edf3;
+            border-radius: 16px;
+            padding: 23px;
+            box-shadow: 0 5px 18px rgba(23, 43, 77, 0.04);
+        }
+
+        .history-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .history-section-header h2 {
+            color: #172b4d;
+            font-size: 18px;
+            margin: 0;
+        }
+
+        .history-result-count {
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 13px;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 18px;
+            padding: 18px;
+            border: 1px solid #e8edf3;
+            border-radius: 12px;
+            transition: 0.2s ease;
+        }
+
+        .history-item:hover {
+            border-color: #b7d8d4;
+            box-shadow: 0 4px 14px rgba(15, 118, 110, 0.06);
+        }
+
+        .history-paper-info {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 0;
+        }
+
+        .history-paper-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            flex-shrink: 0;
+            background: #e8f5f3;
+            color: #0f766e;
+            border-radius: 11px;
+            font-size: 20px;
+        }
+
+        .history-paper-details {
+            min-width: 0;
+        }
+
+        .history-paper-details h3 {
+            color: #172b4d;
+            font-size: 14px;
+            font-weight: 700;
+            margin: 0 0 7px;
+            overflow-wrap: anywhere;
+        }
+
+        .history-date {
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        .history-item-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-shrink: 0;
+        }
+
+        .history-score {
+            min-width: 70px;
+            text-align: center;
+        }
+
+        .history-score strong {
+            display: block;
+            font-size: 21px;
+            font-weight: 750;
+        }
+
+        .history-score span {
+            display: block;
+            color: #94a3b8;
+            font-size: 10px;
+            margin-top: 3px;
+        }
+
+        .score-excellent { color: #0f766e; }
+        .score-good { color: #2563eb; }
+        .score-low { color: #d97706; }
+        .score-unscored { color: #94a3b8; }
+
+        .history-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .history-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 9px 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .history-view {
+            background: #e8f5f3;
+            color: #0f766e;
+        }
+
+        .history-download {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .history-action:hover {
+            opacity: 0.8;
+        }
+
+        .history-empty {
+            text-align: center;
+            padding: 55px 20px;
+        }
+
+        .history-empty-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+            color: #0f766e;
+        }
+
+        .history-empty h3 {
+            color: #172b4d;
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .history-empty p {
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .history-upload-link {
+            display: inline-flex;
+            align-items: center;
+            padding: 11px 17px;
+            border-radius: 9px;
+            background: #0f766e;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .history-pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-top: 24px;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .history-page-link {
+            display: inline-flex;
+            padding: 9px 13px;
+            border: 1px solid #dbe3ed;
+            border-radius: 8px;
+            color: #0f766e;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .history-page-link.disabled {
+            color: #b7c0cc;
+            background: #f8fafc;
+            pointer-events: none;
+        }
+
+        @media (max-width: 950px) {
+            .history-controls {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .history-filter-actions {
+                grid-column: 1 / -1;
+            }
+        }
+
+        @media (max-width: 650px) {
+            .history-page {
+                padding-top: 18px;
+            }
+
+            .history-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .history-item {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .history-item-right {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .history-controls {
+                grid-template-columns: 1fr;
+            }
+
+            .history-filter-actions {
+                grid-column: auto;
+            }
+
+            .history-item-right {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .history-score {
+                text-align: left;
+            }
+
+            .history-section {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="dashboard-layout">
+
+    <aside class="sidebar">
+        <a href="/dashboard" class="brand">
+            <span class="brand-icon">R</span>
+            <span class="brand-name">ResearchLens</span>
+        </a>
+
+        <div class="sidebar-section">
+            <span class="sidebar-label">WORKSPACE</span>
+
+            <a href="/dashboard" class="sidebar-link">
+                <span class="nav-icon">▦</span>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="/upload" class="sidebar-link">
+                <span class="nav-icon">↑</span>
+                <span>Upload Paper</span>
+            </a>
+
+            <a href="/my-papers" class="sidebar-link">
+                <span class="nav-icon">▤</span>
+                <span>My Papers</span>
+            </a>
+
+            <a href="/reports" class="sidebar-link">
+                <span class="nav-icon">▧</span>
+                <span>Analysis Reports</span>
+            </a>
+
+            <a href="/history" class="sidebar-link active">
+                <span class="nav-icon">◷</span>
+                <span>History</span>
+            </a>
+        </div>
+
+        <div class="sidebar-bottom">
+            <div class="sidebar-help">
+                <div class="help-icon">✦</div>
+                <strong>Need research guidance?</strong>
+                <p>Explore AI-powered insights to improve your paper.</p>
+                <a href="/upload">Analyze a paper →</a>
+            </div>
+
+            <button id="logoutButton" class="logout-button" type="button">
+                <span class="nav-icon">↪</span>
+                <span>Sign out</span>
+            </button>
+        </div>
+    </aside>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <main class="main-content">
+
+        <header class="topbar">
+    <button
+        type="button"
+        class="mobile-menu-toggle"
+        id="mobileMenuToggle"
+        aria-label="Open navigation"
+        aria-expanded="false"
+    >
+        ☰
+    </button>
+
+    <div class="page-heading">
+                <span class="page-eyebrow">RESEARCH WORKSPACE</span>
+                <h1>Analysis History</h1>
+                <p class="topbar-subtitle">Your complete research analysis activity.</p>
+            </div>
+
+            <div class="profile-area">
+                <div class="profile-avatar" id="profileAvatar">
+                    {{ (current_user.display_name or current_user.email[0])[0] | upper }}
+                </div>
+
+                <div class="profile-details">
+                    <strong id="profileName">
+                        {{ current_user.display_name or "Researcher" }}
+                    </strong>
+                    <span id="profileEmail">{{ current_user.email }}</span>
+                </div>
+            </div>
+        </header>
+
+        <section class="history-page">
+
+            <div class="history-intro">
+                <h2>Your analysis journey</h2>
+                <p>
+                    View your previous research paper evaluations,
+                    track quality scores, and revisit your recommendations.
+                </p>
+            </div>
+
+            <div class="history-stats">
+
+                <article class="history-stat-card">
+                    <div class="history-stat-icon">▤</div>
+                    <div class="history-stat-label">TOTAL ANALYSES</div>
+                    <div class="history-stat-value">{{ total_reports }}</div>
+                    <div class="history-stat-description">
+                        Reports matching your current filters
+                    </div>
+                </article>
+
+                <article class="history-stat-card">
+                    <div class="history-stat-icon">◈</div>
+                    <div class="history-stat-label">AVERAGE QUALITY SCORE</div>
+                    <div class="history-stat-value">
+                        {% if average_score is not none %}
+                            {{ average_score }}<span style="font-size: 15px;"> / 100</span>
+                        {% else %}
+                            —
+                        {% endif %}
+                    </div>
+                    <div class="history-stat-description">
+                        Average across all your scored reports
+                    </div>
+                </article>
+
+            </div>
+
+            <form method="GET" action="/history" class="history-controls">
+
+                <div class="history-field">
+                    <label for="search">Search Papers</label>
+                    <input
+                        type="search"
+                        id="search"
+                        name="search"
+                        placeholder="Search by paper name..."
+                        value="{{ search }}"
+                    >
+                </div>
+
+                <div class="history-field">
+                    <label for="quality">Quality Level</label>
+                    <select id="quality" name="quality">
+                        <option value="" {% if not quality %}selected{% endif %}>
+                            All Scores
+                        </option>
+                        <option value="excellent" {% if quality == "excellent" %}selected{% endif %}>
+                            Excellent (80+)
+                        </option>
+                        <option value="good" {% if quality == "good" %}selected{% endif %}>
+                            Good (60–79)
+                        </option>
+                        <option value="low" {% if quality == "low" %}selected{% endif %}>
+                            Low (Below 60)
+                        </option>
+                        <option value="unscored" {% if quality == "unscored" %}selected{% endif %}>
+                            Unscored
+                        </option>
+                    </select>
+                </div>
+
+                <div class="history-field">
+                    <label for="sort">Sort By</label>
+                    <select id="sort" name="sort">
+                        <option value="newest" {% if sort == "newest" %}selected{% endif %}>
+                            Newest First
+                        </option>
+                        <option value="oldest" {% if sort == "oldest" %}selected{% endif %}>
+                            Oldest First
+                        </option>
+                    </select>
+                </div>
+
+                <div class="history-filter-actions">
+                    <button type="submit" class="history-apply">Apply</button>
+                    <a href="/history" class="history-clear">Clear</a>
+                </div>
+
+            </form>
+
+            <section class="history-section">
+
+                <div class="history-section-header">
+                    <h2>Previous Analyses</h2>
+
+                    <span class="history-result-count">
+                        {{ total_reports }} result(s) found
+                    </span>
+                </div>
+
+                {% if history_reports %}
+
+                    <div class="history-list">
+
+                        {% for item in history_reports %}
+                            {% set report = item.report %}
+                            {% set paper = item.paper %}
+
+                            <article class="history-item">
+
+                                <div class="history-paper-info">
+                                    <div class="history-paper-icon">▤</div>
+
+                                    <div class="history-paper-details">
+                                        <h3>{{ paper.original_filename }}</h3>
+
+                                        <div class="history-date">
+                                            ◷
+                                            {% if report.created_at %}
+                                                {{ report.created_at.strftime("%d %b %Y, %I:%M %p") }}
+                                            {% else %}
+                                                Date unavailable
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="history-item-right">
+
+                                    <div class="history-score">
+
+                                        {% if report.overall_score is not none %}
+
+                                            {% if report.overall_score >= 80 %}
+                                                {% set score_class = "score-excellent" %}
+                                            {% elif report.overall_score >= 60 %}
+                                                {% set score_class = "score-good" %}
+                                            {% else %}
+                                                {% set score_class = "score-low" %}
+                                            {% endif %}
+
+                                            <strong class="{{ score_class }}">
+                                                {{ "%.1f"|format(report.overall_score) }}
+                                            </strong>
+
+                                            <span>QUALITY SCORE</span>
+
+                                        {% else %}
+
+                                            <strong class="score-unscored">—</strong>
+                                            <span>NOT SCORED</span>
+
+                                        {% endif %}
+
+                                    </div>
+
+                                    <div class="history-actions">
+
+                                        <a
+                                            href="/report/{{ report.id }}"
+                                            class="history-action history-view"
+                                        >
+                                            View Report →
+                                        </a>
+
+                                        <a
+                                            href="/report/{{ report.id }}/download"
+                                            class="history-action history-download"
+                                        >
+                                            Download PDF
+                                        </a>
+
+                                    </div>
+
+                                </div>
+
+                            </article>
+
+                        {% endfor %}
+
+                    </div>
+
+                    {% if total_pages > 1 %}
+
+                        <div class="history-pagination">
+
+                            {% if page > 1 %}
+                                <a
+                                    class="history-page-link"
+                                    href="/history?page={{ page - 1 }}&search={{ search | urlencode }}&quality={{ quality | urlencode }}&sort={{ sort | urlencode }}"
+                                >
+                                    ← Previous
+                                </a>
+                            {% else %}
+                                <span class="history-page-link disabled">← Previous</span>
+                            {% endif %}
+
+                            <span>Page {{ page }} of {{ total_pages }}</span>
+
+                            {% if page < total_pages %}
+                                <a
+                                    class="history-page-link"
+                                    href="/history?page={{ page + 1 }}&search={{ search | urlencode }}&quality={{ quality | urlencode }}&sort={{ sort | urlencode }}"
+                                >
+                                    Next →
+                                </a>
+                            {% else %}
+                                <span class="history-page-link disabled">Next →</span>
+                            {% endif %}
+
+                        </div>
+
+                    {% endif %}
+
+                {% else %}
+
+                    <div class="history-empty">
+                        <div class="history-empty-icon">▤</div>
+
+                        <h3>No analysis history found</h3>
+
+                        {% if search or quality %}
+                            <p>
+                                No reports match your current search or quality filter.
+                                Try changing your filters.
+                            </p>
+                            <a href="/history" class="history-upload-link">
+                                Clear Filters
+                            </a>
+                        {% else %}
+                            <p>
+                                Your completed research paper analyses
+                                will appear here.
+                            </p>
+                            <a href="/upload" class="history-upload-link">
+                                Analyze Your First Paper →
+                            </a>
+                        {% endif %}
+                    </div>
+
+                {% endif %}
+
+            </section>
+
+        </section>
+
+        <footer class="dashboard-footer">
+            <span>ResearchLens</span>
+            <span>AI Research Paper Quality Analyzer</span>
+        </footer>
+
+    </main>
+</div>
+
+<script src="{{ url_for('static', path='js/dashboard.js') }}" type="module"></script>
+
+</body>
+</html>

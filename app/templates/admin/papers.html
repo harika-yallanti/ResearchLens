@@ -1,0 +1,531 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#172b4d">
+
+    <title>Research Papers | ResearchLens</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', path='css/dashboard.css') }}?v=13"
+    >
+
+    <style>
+        .admin-page-section {
+            margin-top: 28px;
+        }
+
+        .admin-page-summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .admin-count {
+            padding: 18px 22px;
+            background: #ffffff;
+            border: 1px solid #edf1f5;
+            border-radius: 12px;
+            min-width: 190px;
+        }
+
+        .admin-count span {
+            display: block;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .admin-count strong {
+            display: block;
+            margin-top: 7px;
+            color: #172b4d;
+            font-size: 27px;
+        }
+
+        .admin-table-wrap {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .admin-table {
+            width: 100%;
+            min-width: 800px;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .admin-table th {
+            padding: 15px 14px;
+            background: #f7f9fc;
+            color: #64748b;
+            font-size: 11px;
+            letter-spacing: .5px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .admin-table td {
+            padding: 16px 14px;
+            border-bottom: 1px solid #edf1f5;
+            color: #334155;
+            font-size: 13px;
+            vertical-align: middle;
+        }
+
+        .admin-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .admin-table strong {
+            color: #172b4d;
+            overflow-wrap: anywhere;
+        }
+
+        .admin-status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            background: #e6f4f1;
+            color: #0f766e;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .admin-empty {
+            padding: 35px 15px;
+            text-align: center;
+            color: #64748b;
+        }
+
+        .paper-filter-form {
+            display: grid;
+            grid-template-columns: minmax(200px, 2fr) repeat(3, minmax(130px, 1fr)) auto auto;
+            gap: 12px;
+            align-items: end;
+            margin: 22px 0;
+        }
+
+        .paper-filter-group label {
+            display: block;
+            margin-bottom: 7px;
+            color: #475569;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .paper-filter-group input,
+        .paper-filter-group select {
+            width: 100%;
+            min-height: 42px;
+            padding: 9px 11px;
+            border: 1px solid #dbe3ec;
+            border-radius: 8px;
+            background: #ffffff;
+            color: #334155;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .paper-filter-group input:focus,
+        .paper-filter-group select:focus {
+            border-color: #0f766e;
+            box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.1);
+        }
+
+        .paper-filter-button {
+            min-height: 42px;
+            padding: 0 17px;
+            border: none;
+            border-radius: 8px;
+            background: #172b4d;
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .paper-reset-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 42px;
+            padding: 0 15px;
+            border: 1px solid #dbe3ec;
+            border-radius: 8px;
+            color: #475569;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .paper-filter-button:hover {
+            background: #0f766e;
+        }
+
+        .paper-reset-button:hover {
+            background: #f7f9fc;
+        }
+
+        .paper-result-count {
+            margin: 0 0 14px;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .paper-pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding: 18px 0 4px;
+        }
+
+        .paper-pagination-info {
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .paper-pagination-links {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .paper-pagination-links a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 34px;
+            height: 34px;
+            padding: 0 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 7px;
+            color: #475569;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .paper-pagination-links a:hover,
+        .paper-pagination-links a.active {
+            background: #172b4d;
+            border-color: #172b4d;
+            color: #ffffff;
+        }
+
+        .paper-details-link {
+    display: inline-flex;
+    align-items: center;
+    color: #0f766e;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.paper-details-link:hover {
+    color: #172b4d;
+    text-decoration: underline;
+}
+
+        @media (max-width: 1100px) {
+            .paper-filter-form {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 600px) {
+            .admin-page-summary {
+                align-items: stretch;
+            }
+
+            .admin-count {
+                width: 100%;
+            }
+
+            .paper-filter-form {
+                grid-template-columns: 1fr;
+            }
+
+            .paper-pagination {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="dashboard-layout">
+
+    <aside class="sidebar">
+        <a href="/admin/dashboard" class="brand">
+            <span class="brand-icon">R</span>
+            <span class="brand-name">ResearchLens</span>
+        </a>
+
+        <div class="sidebar-section">
+            <span class="sidebar-label">ADMINISTRATION</span>
+
+            <a href="/admin/dashboard" class="sidebar-link">
+                <span class="nav-icon">▦</span>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="/admin/users" class="sidebar-link">
+                <span class="nav-icon">♙</span>
+                <span>Manage Users</span>
+            </a>
+
+            <a href="/admin/papers" class="sidebar-link active">
+                <span class="nav-icon">▤</span>
+                <span>Research Papers</span>
+            </a>
+
+            <a href="/admin/analyses" class="sidebar-link">
+                <span class="nav-icon">▧</span>
+                <span>Analysis Records</span>
+            </a>
+        </div>
+
+        <div class="sidebar-bottom">
+            <div class="sidebar-help">
+                <div class="help-icon">✦</div>
+                <strong>Manage ResearchLens</strong>
+                <p>Monitor researchers, uploaded papers, and AI-generated reports.</p>
+                <a href="/admin/dashboard">Back to dashboard <span>→</span></a>
+            </div>
+
+            <button id="logoutButton" class="logout-button" type="button">
+                <span class="nav-icon">↪</span>
+                <span>Sign out</span>
+            </button>
+        </div>
+    </aside>
+
+    <main class="main-content">
+
+        <header class="topbar">
+            <div class="page-heading">
+                <span class="page-eyebrow">ADMINISTRATION</span>
+                <h1>Research Papers</h1>
+                <p class="topbar-subtitle">View research papers uploaded by platform users.</p>
+            </div>
+
+            <div class="profile-area">
+                <div class="profile-avatar">
+                    {{ (current_admin.display_name or current_admin.email or "A")[0] | upper }}
+                </div>
+                <div class="profile-details">
+                    <strong>{{ current_admin.display_name or "Administrator" }}</strong>
+                    <span>{{ current_admin.email }}</span>
+                </div>
+            </div>
+        </header>
+
+        <section class="admin-page-section">
+
+            <div class="admin-page-summary">
+                <div>
+                    <span class="section-eyebrow">PAPER MANAGEMENT</span>
+                    <h2>Uploaded research papers</h2>
+                    <p>Review uploaded files and their processing details.</p>
+                </div>
+
+                <div class="admin-count">
+                    <span>Total uploaded papers</span>
+                    <strong>{{ total_papers }}</strong>
+                </div>
+            </div>
+
+            <section class="content-card">
+                <div class="card-heading">
+                    <div>
+                        <h2>All research papers</h2>
+                        <p>Paper details and uploader information.</p>
+                    </div>
+                </div>
+
+                <form method="GET" action="/admin/papers" class="paper-filter-form">
+
+                    <div class="paper-filter-group">
+                        <label for="search">Search papers</label>
+                        <input
+                            type="text"
+                            id="search"
+                            name="search"
+                            value="{{ search }}"
+                            placeholder="Search title, filename or email"
+                        >
+                    </div>
+
+                    <div class="paper-filter-group">
+                        <label for="status">Processing status</label>
+                        <select id="status" name="status">
+                            <option value="all" {% if status == "all" %}selected{% endif %}>
+                                All statuses
+                            </option>
+                            {% for item in status_options %}
+                            <option value="{{ item }}" {% if status == item %}selected{% endif %}>
+                                {{ item | title }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="paper-filter-group">
+                        <label for="file_type">File type</label>
+                        <select id="file_type" name="file_type">
+                            <option value="all" {% if file_type == "all" %}selected{% endif %}>
+                                All file types
+                            </option>
+                            {% for item in file_type_options %}
+                            <option value="{{ item }}" {% if file_type == item %}selected{% endif %}>
+                                {{ item | upper }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="paper-filter-group">
+                        <label for="sort_by">Sort by</label>
+                        <select id="sort_by" name="sort_by">
+                            <option value="newest" {% if sort_by == "newest" %}selected{% endif %}>
+                                Newest first
+                            </option>
+                            <option value="oldest" {% if sort_by == "oldest" %}selected{% endif %}>
+                                Oldest first
+                            </option>
+                            <option value="title_asc" {% if sort_by == "title_asc" %}selected{% endif %}>
+                                Title A–Z
+                            </option>
+                            <option value="title_desc" {% if sort_by == "title_desc" %}selected{% endif %}>
+                                Title Z–A
+                            </option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="paper-filter-button">
+                        Apply
+                    </button>
+
+                    <a href="/admin/papers" class="paper-reset-button">
+                        Reset
+                    </a>
+
+                </form>
+
+                <p class="paper-result-count">
+                    Showing {{ start_item }}–{{ end_item }} of {{ total_filtered }} matching papers
+                </p>
+
+                <div class="admin-table-wrap">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Paper title / Filename</th>
+                                <th>Uploaded by</th>
+                                <th>File type</th>
+                                <th>Pages</th>
+                                <th>Status</th>
+                                <th>Uploaded on</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for paper, user in papers %}
+                            <tr>
+                                <td>{{ paper.id }}</td>
+                                <td>
+                                    <strong>
+                                        {{ paper.paper_title or paper.original_filename }}
+                                    </strong>
+                                </td>
+                                <td>{{ user.email }}</td>
+                                <td>{{ paper.file_type | upper }}</td>
+                                <td>
+                                    {{ paper.page_count if paper.page_count is not none else "—" }}
+                                </td>
+                                <td>
+                                    <span class="admin-status">
+                                        {{ paper.processing_status or "Unknown" }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {{ paper.uploaded_at.strftime("%d %b %Y") if paper.uploaded_at else "Unavailable" }}
+                                </td>
+                                <td>
+                                  <a
+                                       href="/admin/papers/{{ paper.id }}"
+                                       class="paper-details-link"
+                                  >
+                                       View Details →
+                                  </a>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="8" class="admin-empty">
+                                    No research papers match your search or filters.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if total_pages > 1 %}
+                <div class="paper-pagination">
+
+                    <div class="paper-pagination-info">
+                        Page {{ page }} of {{ total_pages }}
+                    </div>
+
+                    <div class="paper-pagination-links">
+
+                        {% if previous_url %}
+                        <a href="{{ previous_url }}">Previous</a>
+                        {% endif %}
+
+                        {% for item in page_links %}
+                        <a
+                            href="{{ item.url }}"
+                            class="{% if item.number == page %}active{% endif %}"
+                        >
+                            {{ item.number }}
+                        </a>
+                        {% endfor %}
+
+                        {% if next_url %}
+                        <a href="{{ next_url }}">Next</a>
+                        {% endif %}
+
+                    </div>
+                </div>
+                {% endif %}
+
+            </section>
+
+        </section>
+
+        <footer class="dashboard-footer">
+            <span class="footer-brand">ResearchLens</span>
+            <span>AI Research Paper Quality Analyzer</span>
+        </footer>
+
+    </main>
+</div>
+
+<script src="{{ url_for('static', path='js/dashboard.js') }}" type="module"></script>
+</body>
+</html>

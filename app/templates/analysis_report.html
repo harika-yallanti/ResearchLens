@@ -1,0 +1,1765 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Analysis Report | ResearchLens</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', path='css/dashboard.css') }}">
+
+    <style>
+        .report-page {
+            width: 100%;
+            max-width: 1440px;
+            min-width: 0;
+            margin: 0 auto;
+            padding: 28px 0 36px;
+        }
+
+        .report-page *,
+        .report-page *::before,
+        .report-page *::after {
+            box-sizing: border-box;
+        }
+
+        .report-page,
+        .report-page p,
+        .report-page li,
+        .report-page h2,
+        .report-page h3,
+        .report-page h4,
+        .report-page span {
+            overflow-wrap: anywhere;
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 22px;
+        }
+
+        .report-header h2 {
+            margin: 0 0 8px;
+            color: #172b4d;
+            font-size: 25px;
+            font-weight: 750;
+            line-height: 1.4;
+        }
+
+        .report-header p {
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .report-actions {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        .report-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 42px;
+            padding: 10px 16px;
+            border: 1px solid #dce5ed;
+            border-radius: 9px;
+            background: #fff;
+            color: #172b4d;
+            font-size: 13px;
+            font-weight: 650;
+            text-decoration: none;
+            transition: 0.2s ease;
+        }
+
+        .report-action:hover {
+            border-color: #0f766e;
+            color: #0f766e;
+            transform: translateY(-1px);
+        }
+
+        .report-action.primary {
+            border-color: #0f766e;
+            background: #0f766e;
+            color: #fff;
+        }
+
+        .report-action.primary:hover {
+            border-color: #115e59;
+            background: #115e59;
+            color: #fff;
+        }
+
+        .report-card {
+            width: 100%;
+            min-width: 0;
+            padding: 26px;
+            margin-bottom: 22px;
+            border: 1px solid #e7edf3;
+            border-radius: 16px;
+            background: #fff;
+            box-shadow: 0 4px 16px rgba(23, 43, 77, 0.045);
+        }
+
+        .report-card h3 {
+            margin: 0 0 12px;
+            color: #172b4d;
+            font-size: 18px;
+            font-weight: 750;
+            line-height: 1.5;
+        }
+
+        .evaluation-intro,
+        .writing-section-intro {
+            margin-bottom: 20px;
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        .overall-score {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 28px;
+        }
+
+        .score-circle {
+            width: 132px;
+            height: 132px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 9px solid #0f766e;
+            border-radius: 50%;
+            background: #e8f5f3;
+            color: #0f766e;
+        }
+
+        .score-circle strong {
+            font-size: 35px;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+
+        .score-circle span {
+            margin-top: 5px;
+            font-size: 10px;
+            font-weight: 750;
+            letter-spacing: 0.7px;
+        }
+
+        .score-description {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .score-description h4 {
+            margin-bottom: 10px;
+            color: #172b4d;
+            font-size: 19px;
+            font-weight: 750;
+        }
+
+        .score-description p {
+            margin-top: 12px;
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.85;
+        }
+
+        .score-level {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 11px;
+            border-radius: 7px;
+            background: #e8f5f3;
+            color: #0f766e;
+            font-size: 11px;
+            font-weight: 750;
+        }
+
+        .score-level.needs-improvement {
+            background: #fff7ed;
+            color: #c2410c;
+        }
+
+        .score-level.low-score {
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+
+        .scores-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .score-item {
+            min-width: 0;
+            padding: 19px;
+            border: 1px solid #e7edf3;
+            border-radius: 13px;
+            background: #fff;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .score-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(23, 43, 77, 0.07);
+        }
+
+        .score-item-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .score-item-top span {
+            color: #475569;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .score-item-top strong {
+            color: #0f766e;
+            font-size: 15px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .score-bar {
+            width: 100%;
+            height: 8px;
+            margin-bottom: 13px;
+            overflow: hidden;
+            border-radius: 20px;
+            background: #e8edf2;
+        }
+
+        .score-bar-fill {
+            width: 0;
+            height: 100%;
+            border-radius: 20px;
+            background: linear-gradient(90deg, #0f766e, #2ba99a);
+            transition: width 0.8s ease;
+        }
+
+        .score-feedback-title {
+            margin: 15px 0 7px;
+            color: #172b4d;
+            font-size: 12px;
+            font-weight: 750;
+        }
+
+        .score-item-description {
+            margin-top: 10px;
+            color: #64748b;
+            font-size: 12px;
+            line-height: 1.8;
+        }
+
+        .paper-summary-text {
+            color: #475569;
+            font-size: 14px;
+            line-height: 1.95;
+            white-space: pre-line;
+        }
+
+        .keyword-container,
+        .detected-section-tags {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .keyword-chip {
+            display: inline-flex;
+            max-width: 100%;
+            padding: 8px 13px;
+            border: 1px solid #cce9e4;
+            border-radius: 20px;
+            background: #e8f5f3;
+            color: #0f766e;
+            font-size: 12px;
+            font-weight: 650;
+        }
+
+        .structure-summary {
+            padding: 17px;
+            border: 1px solid #e7edf3;
+            border-radius: 11px;
+            background: #f8fafc;
+            color: #475569;
+            font-size: 13px;
+            line-height: 1.85;
+        }
+
+        .structure-subheading {
+            margin: 23px 0 12px;
+            color: #172b4d;
+            font-size: 14px;
+            font-weight: 750;
+        }
+
+        .section-analysis-list {
+            display: flex;
+            flex-direction: column;
+            gap: 11px;
+            margin-top: 14px;
+        }
+
+        .section-analysis-item {
+            min-width: 0;
+            padding: 16px;
+            border: 1px solid #e7edf3;
+            border-radius: 11px;
+            background: #fff;
+        }
+
+        .section-analysis-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 9px;
+        }
+
+        .section-analysis-top strong {
+            color: #172b4d;
+            font-size: 13px;
+            font-weight: 750;
+        }
+
+        .section-status {
+            display: inline-flex;
+            padding: 5px 10px;
+            border-radius: 20px;
+            background: #e8f5f3;
+            color: #0f766e;
+            font-size: 10px;
+            font-weight: 750;
+        }
+
+        .section-status.partial {
+            background: #fff7ed;
+            color: #c2410c;
+        }
+
+        .section-status.missing {
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+
+        .section-status.na {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        .section-analysis-item p {
+            color: #64748b;
+            font-size: 12px;
+            line-height: 1.8;
+        }
+
+        .detected-section-tag {
+            padding: 7px 11px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: #f1f5f9;
+            color: #334155;
+            font-size: 12px;
+            font-weight: 650;
+        }
+
+        .report-list,
+        .writing-tips-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        .report-list li,
+        .writing-tips-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 11px;
+            color: #475569;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        .list-marker,
+        .tip-marker {
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 7px;
+            background: #e8f5f3;
+            color: #0f766e;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .report-empty,
+        .metadata-empty {
+            color: #94a3b8;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        .report-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 20px;
+            align-items: stretch;
+        }
+
+        .report-grid .report-card {
+            margin-bottom: 0;
+        }
+
+        .writing-category {
+            margin-top: 23px;
+        }
+
+        .writing-category:first-of-type {
+            margin-top: 0;
+        }
+
+        .writing-category-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 13px;
+            color: #172b4d;
+            font-size: 14px;
+            font-weight: 750;
+        }
+
+        .writing-category-count {
+            min-width: 24px;
+            height: 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 7px;
+            border-radius: 20px;
+            background: #e8f5f3;
+            color: #0f766e;
+            font-size: 11px;
+        }
+
+        .issue-card {
+            padding: 17px;
+            margin-bottom: 12px;
+            border: 1px solid #e7edf3;
+            border-radius: 12px;
+            background: #fff;
+        }
+
+        .issue-label {
+            margin-bottom: 6px;
+            color: #64748b;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+        }
+
+        .issue-original {
+            margin-bottom: 13px;
+            color: #172b4d;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        .issue-explanation {
+            margin-bottom: 13px;
+            color: #64748b;
+            font-size: 12px;
+            line-height: 1.8;
+        }
+
+        .issue-suggestion {
+            padding: 13px;
+            border: 1px solid #ccfbf1;
+            border-radius: 9px;
+            background: #f0fdfa;
+            color: #115e59;
+            font-size: 12px;
+            line-height: 1.8;
+        }
+
+        .issue-suggestion .issue-label {
+            color: #0f766e;
+        }
+
+        .citation-summary {
+            padding: 17px;
+            margin-bottom: 20px;
+            border: 1px solid #e7edf3;
+            border-radius: 12px;
+            background: #f8fafc;
+            color: #475569;
+            font-size: 13px;
+            line-height: 1.85;
+        }
+
+        .citation-disclaimer,
+        .plagiarism-disclaimer {
+            padding: 15px 17px;
+            margin-top: 20px;
+            border: 1px solid #dbeafe;
+            border-radius: 10px;
+            background: #eff6ff;
+            color: #1e40af;
+            font-size: 12px;
+            line-height: 1.8;
+        }
+
+        .plagiarism-status {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            margin-bottom: 15px;
+            border-radius: 20px;
+            background: #f1f5f9;
+            color: #475569;
+            font-size: 11px;
+            font-weight: 750;
+            text-transform: capitalize;
+        }
+
+        .plagiarism-status.completed {
+            background: #e8f5f3;
+            color: #0f766e;
+        }
+
+        .plagiarism-status.pending {
+            background: #fff7ed;
+            color: #c2410c;
+        }
+
+        .plagiarism-status.failed {
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+
+        .plagiarism-score-container {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 24px;
+            padding: 20px;
+            margin: 5px 0 20px;
+            border: 1px solid #dcebe8;
+            border-radius: 13px;
+            background: #f8fcfb;
+        }
+
+        .plagiarism-score {
+            width: 112px;
+            height: 112px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 7px solid #0f766e;
+            border-radius: 50%;
+            background: #e8f5f3;
+            color: #0f766e;
+            text-align: center;
+        }
+
+        .plagiarism-score strong {
+            font-size: 25px;
+            font-weight: 800;
+        }
+
+        .plagiarism-score span {
+            margin-top: 4px;
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 0.6px;
+        }
+
+        .plagiarism-score-description {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .plagiarism-score-description h4 {
+            margin-bottom: 8px;
+            color: #172b4d;
+            font-size: 15px;
+            font-weight: 750;
+        }
+
+        .plagiarism-score-description p {
+            color: #64748b;
+            font-size: 12px;
+            line-height: 1.8;
+        }
+
+        .plagiarism-source {
+            min-width: 0;
+            padding: 16px;
+            margin-top: 12px;
+            border: 1px solid #e7edf3;
+            border-radius: 11px;
+            background: #fff;
+        }
+
+        .plagiarism-source h4 {
+            margin-bottom: 9px;
+            color: #172b4d;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .plagiarism-source p {
+            margin-top: 6px;
+            color: #64748b;
+            font-size: 12px;
+            line-height: 1.8;
+        }
+
+        .plagiarism-passage {
+            padding: 16px;
+            margin-top: 12px;
+            border: 1px solid #e7edf3;
+            border-left: 4px solid #0f766e;
+            border-radius: 10px;
+            background: #f8fafc;
+            color: #475569;
+            font-size: 13px;
+            line-height: 1.85;
+        }
+
+        .plagiarism-action-form {
+            margin-top: 20px;
+        }
+
+        .plagiarism-check-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 43px;
+            padding: 11px 19px;
+            border: none;
+            border-radius: 9px;
+            background: #0f766e;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 750;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        .plagiarism-check-button:hover {
+            background: #115e59;
+            transform: translateY(-1px);
+        }
+
+        .plagiarism-check-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .plagiarism-error {
+            padding: 15px;
+            margin-top: 14px;
+            border: 1px solid #fecaca;
+            border-radius: 10px;
+            background: #fef2f2;
+            color: #b91c1c;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        .report-page img,
+        .report-page table {
+            max-width: 100%;
+        }
+
+        @media (max-width: 1100px) {
+            .scores-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .report-card {
+                padding: 22px;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .report-page {
+                padding-top: 22px;
+            }
+
+            .report-grid {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .report-grid .report-card {
+                margin-bottom: 20px;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .report-page {
+                padding: 18px 0 28px;
+            }
+
+            .report-header {
+                margin-bottom: 17px;
+            }
+
+            .report-header h2 {
+                font-size: 21px;
+            }
+
+            .report-card {
+                padding: 19px;
+                margin-bottom: 17px;
+                border-radius: 13px;
+            }
+
+            .report-card h3 {
+                font-size: 16px;
+            }
+
+            .overall-score {
+                gap: 18px;
+            }
+
+            .score-circle {
+                width: 105px;
+                height: 105px;
+                border-width: 7px;
+            }
+
+            .score-circle strong {
+                font-size: 29px;
+            }
+
+            .score-description {
+                min-width: 150px;
+            }
+
+            .score-description h4 {
+                font-size: 16px;
+            }
+
+            .plagiarism-score-container {
+                gap: 17px;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .scores-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .report-actions {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 9px;
+            }
+
+            .report-action {
+                width: 100%;
+            }
+
+            .overall-score {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .score-description {
+                width: 100%;
+            }
+
+            .plagiarism-score-container {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .plagiarism-score {
+                width: 105px;
+                height: 105px;
+            }
+
+            .plagiarism-check-button {
+                width: 100%;
+            }
+
+            .issue-card {
+                padding: 14px;
+            }
+
+            .report-card {
+                padding: 16px;
+            }
+
+            .structure-subheading {
+                margin-top: 19px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .report-header h2 {
+                font-size: 18px;
+            }
+
+            .score-circle {
+                width: 95px;
+                height: 95px;
+            }
+
+            .score-circle strong {
+                font-size: 25px;
+            }
+
+            .report-card {
+                padding: 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+{% macro render_issue_section(title, issues, category) %}
+<section class="writing-category">
+
+    <h4 class="writing-category-title">
+        {{ title }}
+        <span class="writing-category-count">
+            {{ issues|length if issues else 0 }}
+        </span>
+    </h4>
+
+    {% if issues %}
+        {% for item in issues %}
+            <article class="issue-card">
+
+                <div class="issue-label">Original Text</div>
+                <p class="issue-original">{{ item.original_text }}</p>
+
+                <div class="issue-label">Issue</div>
+                <p class="issue-original">
+                    {{ item.issue or "Potential issue identified" }}
+                </p>
+
+                {% if item.explanation %}
+                    <div class="issue-label">Explanation</div>
+                    <p class="issue-explanation">{{ item.explanation }}</p>
+                {% endif %}
+
+                <div class="issue-suggestion">
+                    <div class="issue-label">Suggested Correction</div>
+                    {{ item.suggestion }}
+                </div>
+
+            </article>
+        {% endfor %}
+    {% else %}
+        <p class="report-empty">
+            No {{ category }} issues were identified in the analyzed text.
+        </p>
+    {% endif %}
+
+</section>
+{% endmacro %}
+
+
+{% macro render_reference_list(title, items, empty_message) %}
+<section class="writing-category">
+
+    <h4 class="writing-category-title">
+        {{ title }}
+        <span class="writing-category-count">
+            {{ items|length if items else 0 }}
+        </span>
+    </h4>
+
+    {% if items %}
+        <ul class="report-list">
+            {% for item in items %}
+                <li>
+                    <span class="list-marker">•</span>
+                    <span>{{ item }}</span>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="report-empty">{{ empty_message }}</p>
+    {% endif %}
+
+</section>
+{% endmacro %}
+
+
+<div class="dashboard-layout">
+
+    <aside class="sidebar">
+
+        <a href="/dashboard" class="brand">
+            <span class="brand-icon">R</span>
+            <span class="brand-name">ResearchLens</span>
+        </a>
+
+        <div class="sidebar-section">
+
+            <span class="sidebar-label">WORKSPACE</span>
+
+            <a href="/dashboard" class="sidebar-link">
+                <span class="nav-icon">▦</span>
+                <span class="sidebar-link-text">Dashboard</span>
+            </a>
+
+            <a href="/upload" class="sidebar-link">
+                <span class="nav-icon">↑</span>
+                <span class="sidebar-link-text">Upload Paper</span>
+            </a>
+
+            <a href="/my-papers" class="sidebar-link">
+                <span class="nav-icon">▤</span>
+                <span class="sidebar-link-text">My Papers</span>
+            </a>
+
+            <a href="/reports" class="sidebar-link active">
+                <span class="nav-icon">▧</span>
+                <span class="sidebar-link-text">Analysis Reports</span>
+            </a>
+
+            <a href="/history" class="sidebar-link">
+                <span class="nav-icon">◷</span>
+                <span class="sidebar-link-text">History</span>
+            </a>
+
+        </div>
+
+        <div class="sidebar-bottom">
+
+            <div class="sidebar-help">
+                <div class="help-icon">✦</div>
+
+                <strong>Need research guidance?</strong>
+
+                <p>
+                    Explore AI-powered insights to improve your paper.
+                </p>
+
+                <a href="/docs">Explore features →</a>
+            </div>
+
+            <button id="logoutButton" class="logout-button">
+                <span class="nav-icon">↪</span>
+                <span class="sidebar-link-text">Sign out</span>
+            </button>
+
+        </div>
+
+    </aside>
+
+
+    <main class="main-content">
+
+        <header class="topbar">
+
+            <div class="page-heading">
+                <span class="page-eyebrow">AI PAPER EVALUATION</span>
+                <h1>Analysis Report</h1>
+            </div>
+
+            <div class="profile-area">
+                <div class="profile-avatar" id="profileAvatar">
+                    {{ (current_user.display_name or current_user.email[0])[0] | upper }}
+                </div>
+
+                <div class="profile-details">
+                    <strong id="profileName">
+                        {{ current_user.display_name or "Researcher" }}
+                    </strong>
+
+                    <span id="profileEmail">
+                        {{ current_user.email }}
+                    </span>
+                </div>
+            </div>
+
+        </header>
+
+
+        <section class="report-page">
+
+            <div class="report-header">
+                <div>
+                    <h2>{{ paper.original_filename }}</h2>
+                    <p>
+                        Generated on
+                        {{ report.created_at.strftime("%d %b %Y, %I:%M %p") }}
+                    </p>
+                </div>
+            </div>
+
+
+            <div class="report-actions">
+
+                <a href="/reports" class="report-action">
+                    ← All Reports
+                </a>
+
+                <a href="/my-papers" class="report-action">
+                    My Papers
+                </a>
+
+                <a href="/report/{{ report.id }}/download" class="report-action primary">
+                    ↓ Download PDF Report
+                </a>
+
+            </div>
+
+
+            <section class="report-card">
+
+                <div class="overall-score">
+
+                    <div class="score-circle">
+                        <strong>
+                            {{ report.overall_score if report.overall_score is not none else "N/A" }}
+                        </strong>
+                        <span>OUT OF 100</span>
+                    </div>
+
+                    <div class="score-description">
+
+                        <h4>Overall Paper Quality</h4>
+
+                        {% if report.overall_score is not none %}
+                            {% if report.overall_score >= 90 %}
+                                <span class="score-level">Excellent Evaluation Score</span>
+                            {% elif report.overall_score >= 80 %}
+                                <span class="score-level">Very Good Evaluation Score</span>
+                            {% elif report.overall_score >= 70 %}
+                                <span class="score-level">Good Evaluation Score</span>
+                            {% elif report.overall_score >= 60 %}
+                                <span class="score-level needs-improvement">Needs Improvement</span>
+                            {% else %}
+                                <span class="score-level low-score">Requires Significant Improvement</span>
+                            {% endif %}
+                        {% endif %}
+
+                        <p style="margin-top: 12px;">
+                            {{ report.summary or "No summary available." }}
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <section class="report-card">
+
+                <h3>Research Paper Summary</h3>
+
+                <p class="evaluation-intro">
+                    An AI-generated summary highlighting the objective,
+                    methodology, major findings, and conclusion of your paper.
+                </p>
+
+                {% if report.paper_summary %}
+                    <p class="paper-summary-text">{{ report.paper_summary }}</p>
+                {% else %}
+                    <p class="metadata-empty">
+                        No detailed research paper summary is available.
+                        Generate a new analysis to view the summary.
+                    </p>
+                {% endif %}
+
+            </section>
+
+
+            <section class="report-card">
+
+                <h3>Extracted Research Keywords</h3>
+
+                <p class="evaluation-intro">
+                    Important research concepts, technologies, methods,
+                    and topics identified from your paper.
+                </p>
+
+                {% if report.keywords %}
+                    <div class="keyword-container">
+                        {% for keyword in report.keywords %}
+                            <span class="keyword-chip">{{ keyword }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="metadata-empty">
+                        No research keywords are available for this report.
+                    </p>
+                {% endif %}
+
+            </section>
+
+
+            <section class="report-card">
+
+                <h3>Evaluation Scores</h3>
+
+                <p class="evaluation-intro">
+                    Review the quality of your research paper across six
+                    important academic evaluation categories. Each score
+                    includes AI-generated feedback based on the paper content.
+                </p>
+
+                {% set score_items = [
+                    ("Structure", report.structure_score, report.structure_feedback),
+                    ("Writing Quality", report.writing_score, report.writing_feedback),
+                    ("Methodology", report.methodology_score, report.methodology_feedback),
+                    ("Abstract", report.abstract_score, report.abstract_feedback),
+                    ("Conclusion", report.conclusion_score, report.conclusion_feedback),
+                    ("References", report.references_score, report.references_feedback)
+                ] %}
+
+                <div class="scores-grid">
+
+                    {% for label, score, feedback in score_items %}
+
+                        {% if score is not none %}
+                            {% if score >= 90 %}
+                                {% set level = "Excellent" %}
+                                {% set level_class = "" %}
+                            {% elif score >= 80 %}
+                                {% set level = "Very Good" %}
+                                {% set level_class = "" %}
+                            {% elif score >= 70 %}
+                                {% set level = "Good" %}
+                                {% set level_class = "" %}
+                            {% elif score >= 60 %}
+                                {% set level = "Needs Improvement" %}
+                                {% set level_class = "needs-improvement" %}
+                            {% else %}
+                                {% set level = "Requires Attention" %}
+                                {% set level_class = "low-score" %}
+                            {% endif %}
+                        {% else %}
+                            {% set level = "Not Evaluated" %}
+                            {% set level_class = "needs-improvement" %}
+                        {% endif %}
+
+                        <article class="score-item">
+
+                            <div class="score-item-top">
+                                <span>{{ label }}</span>
+                                <strong>
+                                    {{ score if score is not none else "N/A" }}
+                                    {% if score is not none %}/100{% endif %}
+                                </strong>
+                            </div>
+
+                            <div class="score-bar">
+                                <div
+                                    class="score-bar-fill"
+                                    data-score="{{ score if score is not none else 0 }}">
+                                </div>
+                            </div>
+
+                            <span class="score-level {{ level_class }}">
+                                {{ level }}
+                            </span>
+
+                            <h4 class="score-feedback-title">
+                                AI Evaluation Feedback
+                            </h4>
+
+                            {% if feedback %}
+                                <p class="score-item-description">{{ feedback }}</p>
+                            {% else %}
+                                <p class="score-item-description">
+                                    Detailed AI feedback is not available
+                                    for this report.
+                                </p>
+                            {% endif %}
+
+                        </article>
+
+                    {% endfor %}
+
+                </div>
+
+            </section>
+
+
+            <section class="report-card">
+
+                <h3>Research Structure & Formatting Analysis</h3>
+
+                <p class="evaluation-intro">
+                    A detailed review of your paper's academic structure,
+                    section completeness, organization, and formatting.
+                </p>
+
+                {% if report.structure_summary %}
+                    <h4 class="structure-subheading">Structure Summary</h4>
+                    <div class="structure-summary">
+                        {{ report.structure_summary }}
+                    </div>
+                {% endif %}
+
+                {% if report.detected_sections %}
+                    <h4 class="structure-subheading">Detected Sections</h4>
+                    <div class="detected-section-tags">
+                        {% for section in report.detected_sections %}
+                            <span class="detected-section-tag">{{ section }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                {% if report.section_analysis %}
+                    <h4 class="structure-subheading">Section-by-Section Analysis</h4>
+
+                    <div class="section-analysis-list">
+                        {% for item in report.section_analysis %}
+
+                            {% set status = (item.status or "")|lower %}
+
+                            {% if "partial" in status %}
+                                {% set status_class = "partial" %}
+                            {% elif "missing" in status or "absent" in status %}
+                                {% set status_class = "missing" %}
+                            {% elif "not applicable" in status or "not required" in status %}
+                                {% set status_class = "na" %}
+                            {% else %}
+                                {% set status_class = "" %}
+                            {% endif %}
+
+                            <article class="section-analysis-item">
+
+                                <div class="section-analysis-top">
+                                    <strong>
+                                        {{ item.section or "Unnamed Section" }}
+                                    </strong>
+
+                                    {% if item.status %}
+                                        <span class="section-status {{ status_class }}">
+                                            {{ item.status }}
+                                        </span>
+                                    {% endif %}
+                                </div>
+
+                                {% if item.observation %}
+                                    <p>{{ item.observation }}</p>
+                                {% else %}
+                                    <p>No additional observation is available.</p>
+                                {% endif %}
+
+                            </article>
+
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <h4 class="structure-subheading">Formatting Issues</h4>
+
+                {% if report.formatting_issues %}
+                    <ul class="report-list">
+                        {% for issue in report.formatting_issues %}
+                            <li>
+                                <span class="list-marker">!</span>
+                                <span>{{ issue }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="report-empty">
+                        No specific formatting issues were identified.
+                    </p>
+                {% endif %}
+
+                {% if not report.structure_summary
+                      and not report.detected_sections
+                      and not report.section_analysis
+                      and not report.formatting_issues %}
+                    <p class="metadata-empty">
+                        Detailed structure analysis is not available for this
+                        report. Generate a new analysis to view these details.
+                    </p>
+                {% endif %}
+
+            </section>
+
+
+            <section class="report-card">
+
+                <h3>Grammar, Spelling & Sentence Clarity</h3>
+
+                <p class="writing-section-intro">
+                    AI-powered writing analysis identifies possible language
+                    issues in your paper and provides explanations and suggested
+                    corrections. Review the original text before applying changes.
+                </p>
+
+                {{ render_issue_section(
+                    "Grammar Issues",
+                    report.grammar_issues,
+                    "grammar"
+                ) }}
+
+                {{ render_issue_section(
+                    "Spelling Issues",
+                    report.spelling_issues,
+                    "spelling"
+                ) }}
+
+                {{ render_issue_section(
+                    "Sentence Clarity Issues",
+                    report.clarity_issues,
+                    "sentence clarity"
+                ) }}
+
+            </section>
+
+
+            <section class="report-card">
+
+                <h3>Writing Improvement Tips</h3>
+
+                <p class="evaluation-intro">
+                    Practical suggestions to improve the clarity,
+                    readability and academic quality of your writing.
+                </p>
+
+                {% if report.writing_tips %}
+                    <ul class="writing-tips-list">
+                        {% for tip in report.writing_tips %}
+                            <li>
+                                <span class="tip-marker">✦</span>
+                                <span>{{ tip }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="report-empty">
+                        No additional writing tips are available for this report.
+                    </p>
+                {% endif %}
+
+            </section>
+
+
+            <section class="report-card">
+
+                <h3>Citation & Reference Analysis</h3>
+
+                <p class="writing-section-intro">
+                    Review the citations and reference list in your research paper.
+                    The AI identifies possible citation mismatches and formatting
+                    inconsistencies.
+                </p>
+
+                {% if report.citation_summary %}
+                    <div class="citation-summary">
+                        <strong>Citation Analysis Summary</strong>
+                        <p style="margin-top: 8px;">
+                            {{ report.citation_summary }}
+                        </p>
+                    </div>
+                {% else %}
+                    <p class="report-empty">
+                        No citation analysis summary is available for this report.
+                    </p>
+                {% endif %}
+
+                {{ render_issue_section(
+                    "Citation Issues",
+                    report.citation_issues,
+                    "citation"
+                ) }}
+
+                {{ render_reference_list(
+                    "Missing References",
+                    report.missing_references,
+                    "No potentially missing references were identified."
+                ) }}
+
+                {{ render_reference_list(
+                    "Uncited References",
+                    report.uncited_references,
+                    "No potentially uncited references were identified."
+                ) }}
+
+                {{ render_reference_list(
+                    "Citation Formatting Issues",
+                    report.citation_format_issues,
+                    "No citation formatting issues were identified."
+                ) }}
+
+                <div class="citation-disclaimer">
+                    <strong>Note:</strong> Citation analysis is AI-assisted and may
+                    produce inaccurate results. Please manually verify suggested
+                    citation corrections and reference matches. This feature checks
+                    citation consistency; it does not perform plagiarism detection.
+                </div>
+
+            </section>
+
+
+            <section class="report-card">
+
+                <h3>Plagiarism & Similarity Analysis</h3>
+
+                <p class="evaluation-intro">
+                    Compare your research paper against accessible scholarly
+                    publications indexed by OpenAlex. Review potential text
+                    similarities and their corresponding sources.
+                </p>
+
+                {% if plagiarism_check %}
+
+                    <span class="plagiarism-status {{ plagiarism_check.status|lower }}">
+                        {{ plagiarism_check.status }}
+                    </span>
+
+                    {% if plagiarism_check.status == "completed" %}
+
+                        <div class="plagiarism-score-container">
+
+                            <div class="plagiarism-score">
+                                <strong>
+                                    {% if plagiarism_check.similarity_score is not none %}
+                                        {{ "%.2f"|format(plagiarism_check.similarity_score) }}%
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </strong>
+                                <span>SIMILARITY</span>
+                            </div>
+
+                            <div class="plagiarism-score-description">
+
+                                <h4>OpenAlex Similarity Indicator</h4>
+
+                                <p>
+                                    This value represents the highest abstract-based
+                                    similarity indicator returned by the comparison
+                                    service. It is not a verified plagiarism percentage.
+                                </p>
+
+                                {% if plagiarism_check.checked_at %}
+                                    <p style="margin-top: 8px;">
+                                        <strong>Last checked:</strong>
+                                        {{ plagiarism_check.checked_at.strftime("%d %b %Y, %I:%M %p") }}
+                                    </p>
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+                        {% if plagiarism_check.plagiarism_summary %}
+                            <h4 class="structure-subheading">Similarity Summary</h4>
+                            <div class="structure-summary">
+                                {{ plagiarism_check.plagiarism_summary }}
+                            </div>
+                        {% endif %}
+
+                        <h4 class="structure-subheading">Comparison Sources</h4>
+
+                        {% if plagiarism_check.similarity_sources %}
+                            {% for source in plagiarism_check.similarity_sources %}
+                                {% if source is mapping %}
+                                    <article class="plagiarism-source">
+
+                                        <h4>
+                                            {{ source.get("title") or source.get("source_title") or "Untitled scholarly source" }}
+                                        </h4>
+
+                                        <p>
+                                            <strong>Similarity indicator:</strong>
+                                            {% set source_score = source.get("similarity_score", source.get("similarity")) %}
+                                            {% if source_score is not none %}
+                                                {{ "%.2f"|format(source_score|float) }}%
+                                            {% else %}
+                                                Not available
+                                            {% endif %}
+                                        </p>
+
+                                        {% if source.get("year") %}
+                                            <p>
+                                                <strong>Publication year:</strong>
+                                                {{ source.get("year") }}
+                                            </p>
+                                        {% endif %}
+
+                                        {% if source.get("doi") %}
+                                            <p>
+                                                <strong>DOI:</strong>
+                                                {{ source.get("doi") }}
+                                            </p>
+                                        {% endif %}
+
+                                    </article>
+                                {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <p class="report-empty">
+                                No comparison sources were available.
+                            </p>
+                        {% endif %}
+
+                        <h4 class="structure-subheading">
+                            Potentially Matching Passages
+                        </h4>
+
+                        {% if plagiarism_check.matched_passages %}
+                            {% for passage in plagiarism_check.matched_passages %}
+
+                                {% if passage is mapping %}
+                                    <article class="plagiarism-passage">
+
+                                        <p>
+                                            {{ passage.get("passage") or passage.get("text") or passage.get("original_text") or "Passage text unavailable." }}
+                                        </p>
+
+                                        {% if passage.get("source_title") or passage.get("title") %}
+                                            <p style="margin-top: 9px;">
+                                                <strong>Source:</strong>
+                                                {{ passage.get("source_title") or passage.get("title") }}
+                                            </p>
+                                        {% endif %}
+
+                                        {% set passage_score = passage.get("similarity_score", passage.get("similarity")) %}
+
+                                        {% if passage_score is not none %}
+                                            <p>
+                                                <strong>Similarity indicator:</strong>
+                                                {{ "%.2f"|format(passage_score|float) }}%
+                                            </p>
+                                        {% endif %}
+
+                                    </article>
+
+                                {% elif passage is string %}
+                                    <article class="plagiarism-passage">
+                                        {{ passage }}
+                                    </article>
+                                {% endif %}
+
+                            {% endfor %}
+                        {% else %}
+                            <p class="report-empty">
+                                No potentially matching passages were identified.
+                            </p>
+                        {% endif %}
+
+                        <form
+                            method="POST"
+                            action="/plagiarism/check/{{ paper.id }}"
+                            class="plagiarism-action-form"
+                            onsubmit="return confirm('Run a new similarity check for this paper?');">
+
+                            <button type="submit" class="plagiarism-check-button">
+                                ↻ Check Again
+                            </button>
+
+                        </form>
+
+                    {% elif plagiarism_check.status == "failed" %}
+
+                        <div class="plagiarism-error">
+                            <strong>Similarity check failed.</strong>
+                            <p>
+                                {{ plagiarism_check.error_message or "An unexpected error occurred while checking similarity." }}
+                            </p>
+                        </div>
+
+                        <form
+                            method="POST"
+                            action="/plagiarism/check/{{ paper.id }}"
+                            class="plagiarism-action-form">
+
+                            <button type="submit" class="plagiarism-check-button">
+                                Retry Similarity Check
+                            </button>
+
+                        </form>
+
+                    {% elif plagiarism_check.status == "pending" %}
+
+                        <p class="report-empty">
+                            Your similarity check is currently pending.
+                        </p>
+
+                    {% else %}
+
+                        <p class="report-empty">
+                            No completed similarity results are available yet.
+                        </p>
+
+                    {% endif %}
+
+                {% else %}
+
+                    <p class="report-empty">
+                        This paper has not been checked for scholarly-source similarity yet.
+                    </p>
+
+                    <form
+                        method="POST"
+                        action="/plagiarism/check/{{ paper.id }}"
+                        class="plagiarism-action-form">
+
+                        <button type="submit" class="plagiarism-check-button">
+                            Check Similarity
+                        </button>
+
+                    </form>
+
+                {% endif %}
+
+                <div class="plagiarism-disclaimer">
+                    <strong>Important:</strong>
+                    This feature compares extracted passages against accessible
+                    scholarly abstracts indexed by OpenAlex. It does not scan the
+                    complete internet, subscription databases, or every published
+                    research paper. It may miss paraphrased similarities and cannot
+                    establish plagiarism or originality. Always review the results
+                    manually.
+                </div>
+
+            </section>
+
+
+            <div class="report-grid">
+
+                <section class="report-card">
+                    <h3>Strengths</h3>
+
+                    {% if report.strengths %}
+                        <ul class="report-list">
+                            {% for item in report.strengths %}
+                                <li>
+                                    <span class="list-marker">✓</span>
+                                    <span>{{ item }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="report-empty">No strengths were provided.</p>
+                    {% endif %}
+                </section>
+
+
+                <section class="report-card">
+                    <h3>Weaknesses</h3>
+
+                    {% if report.weaknesses %}
+                        <ul class="report-list">
+                            {% for item in report.weaknesses %}
+                                <li>
+                                    <span class="list-marker">!</span>
+                                    <span>{{ item }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="report-empty">No weaknesses were provided.</p>
+                    {% endif %}
+                </section>
+
+
+                <section class="report-card">
+                    <h3>Missing or Incomplete Sections</h3>
+
+                    {% if report.missing_sections %}
+                        <ul class="report-list">
+                            {% for item in report.missing_sections %}
+                                <li>
+                                    <span class="list-marker">−</span>
+                                    <span>{{ item }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="report-empty">No missing sections were reported.</p>
+                    {% endif %}
+                </section>
+
+
+                <section class="report-card">
+                    <h3>Recommendations</h3>
+
+                    {% if report.recommendations %}
+                        <ul class="report-list">
+                            {% for item in report.recommendations %}
+                                <li>
+                                    <span class="list-marker">↗</span>
+                                    <span>{{ item }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="report-empty">No recommendations were provided.</p>
+                    {% endif %}
+                </section>
+
+            </div>
+
+        </section>
+
+
+        <footer class="dashboard-footer">
+            <span>ResearchLens</span>
+            <span>AI Research Paper Quality Analyzer</span>
+        </footer>
+
+    </main>
+
+</div>
+
+
+<script src="{{ url_for('static', path='js/dashboard.js') }}" type="module"></script>
+
+<script>
+    document.querySelectorAll(".score-bar-fill").forEach(function (bar) {
+        const score = Number(bar.dataset.score);
+        const validScore = Number.isFinite(score)
+            ? Math.max(0, Math.min(100, score))
+            : 0;
+
+        bar.style.width = validScore + "%";
+    });
+</script>
+
+</body>
+</html>

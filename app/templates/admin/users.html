@@ -1,0 +1,650 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#172b4d">
+
+    <title>Manage Users | ResearchLens</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', path='css/dashboard.css') }}?v=13"
+    >
+
+    <style>
+        .admin-page-section {
+            margin-top: 28px;
+        }
+
+        .admin-page-summary {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .admin-count {
+            padding: 18px 22px;
+            background: #ffffff;
+            border: 1px solid #edf1f5;
+            border-radius: 12px;
+            min-width: 190px;
+        }
+
+        .admin-count span {
+            display: block;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .admin-count strong {
+            display: block;
+            margin-top: 7px;
+            color: #172b4d;
+            font-size: 27px;
+        }
+
+        .admin-table-wrap {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .admin-table {
+            width: 100%;
+            min-width: 950px;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .admin-table th {
+            padding: 15px 14px;
+            background: #f7f9fc;
+            color: #64748b;
+            font-size: 11px;
+            letter-spacing: .5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .admin-table td {
+            padding: 16px 14px;
+            border-bottom: 1px solid #edf1f5;
+            color: #334155;
+            font-size: 13px;
+            vertical-align: middle;
+        }
+
+        .admin-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .admin-table strong {
+            color: #172b4d;
+        }
+
+        .admin-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            background: #e6f4f1;
+            color: #0f766e;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .admin-badge.researcher {
+            background: #eff4ff;
+            color: #345a9c;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .status-badge.active {
+            background: #ccfbf1;
+            color: #0f766e;
+        }
+
+        .status-badge.inactive {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .account-action-form {
+            margin: 0;
+        }
+
+        .account-action-button {
+            border: none;
+            padding: 9px 15px;
+            border-radius: 7px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .activate-button {
+            background: #ccfbf1;
+            color: #0f766e;
+        }
+
+        .activate-button:hover {
+            background: #99f6e4;
+        }
+
+        .deactivate-button {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .deactivate-button:hover {
+            background: #fecaca;
+        }
+
+        .current-account {
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .admin-empty {
+            padding: 35px 15px;
+            text-align: center;
+            color: #64748b;
+        }
+
+        @media (max-width: 600px) {
+            .admin-page-summary {
+                align-items: stretch;
+            }
+
+            .admin-count {
+                width: 100%;
+            }
+        }
+
+        .user-filter-form {
+            display: grid;
+            grid-template-columns: minmax(200px, 2fr) repeat(3, minmax(130px, 1fr)) auto auto;
+            gap: 12px;
+            margin: 22px 0;
+            align-items: end;
+        }
+
+        .user-filter-group label {
+            display: block;
+            margin-bottom: 7px;
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .user-filter-group input,
+        .user-filter-group select {
+            width: 100%;
+            min-height: 42px;
+            padding: 10px 12px;
+            border: 1px solid #dbe3ec;
+            border-radius: 8px;
+            background: #ffffff;
+            color: #334155;
+            font: inherit;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .user-filter-group input:focus,
+        .user-filter-group select:focus {
+            border-color: #0f766e;
+            box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.1);
+        }
+
+        .filter-button,
+        .reset-button {
+            min-height: 42px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .filter-button {
+            border: none;
+            background: #0f766e;
+            color: #ffffff;
+        }
+
+        .filter-button:hover {
+            background: #115e59;
+        }
+
+        .reset-button {
+            border: 1px solid #dbe3ec;
+            color: #475569;
+            background: #ffffff;
+        }
+
+        .filter-result-count {
+            margin: 15px 0;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .admin-pagination {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 22px;
+        }
+
+        .pagination-pages {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .pagination-link {
+            min-width: 36px;
+            height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 10px;
+            border: 1px solid #dbe3ec;
+            border-radius: 7px;
+            color: #475569;
+            font-size: 13px;
+            text-decoration: none;
+        }
+
+        .pagination-link.active {
+            border-color: #0f766e;
+            background: #0f766e;
+            color: #ffffff;
+        }
+
+        .pagination-link.disabled {
+            opacity: 0.45;
+            pointer-events: none;
+        }
+
+        @media (max-width: 1050px) {
+            .user-filter-form {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 600px) {
+            .user-filter-form {
+                grid-template-columns: 1fr;
+            }
+
+            .admin-pagination {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .pagination-pages {
+                justify-content: center;
+            }
+        }
+        .view-details-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 9px 13px;
+    border: 1px solid #ccfbf1;
+    border-radius: 7px;
+    background: #f0fdfa;
+    color: #0f766e;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.view-details-button:hover {
+    background: #ccfbf1;
+}
+
+    </style>
+</head>
+
+<body>
+<div class="dashboard-layout">
+
+    <aside class="sidebar">
+        <a href="/admin/dashboard" class="brand">
+            <span class="brand-icon">R</span>
+            <span class="brand-name">ResearchLens</span>
+        </a>
+
+        <div class="sidebar-section">
+            <span class="sidebar-label">ADMINISTRATION</span>
+
+            <a href="/admin/dashboard" class="sidebar-link">
+                <span class="nav-icon">▦</span>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="/admin/users" class="sidebar-link active">
+                <span class="nav-icon">♙</span>
+                <span>Manage Users</span>
+            </a>
+
+            <a href="/admin/papers" class="sidebar-link">
+                <span class="nav-icon">▤</span>
+                <span>Research Papers</span>
+            </a>
+
+            <a href="/admin/analyses" class="sidebar-link">
+                <span class="nav-icon">▧</span>
+                <span>Analysis Records</span>
+            </a>
+        </div>
+
+        <div class="sidebar-bottom">
+            <div class="sidebar-help">
+                <div class="help-icon">✦</div>
+                <strong>Manage ResearchLens</strong>
+                <p>Monitor researchers, uploaded papers, and AI-generated reports.</p>
+                <a href="/admin/dashboard">
+                    Back to dashboard <span>→</span>
+                </a>
+            </div>
+
+            <button id="logoutButton" class="logout-button" type="button">
+                <span class="nav-icon">↪</span>
+                <span>Sign out</span>
+            </button>
+        </div>
+    </aside>
+
+    <main class="main-content">
+
+        <header class="topbar">
+            <div class="page-heading">
+                <span class="page-eyebrow">ADMINISTRATION</span>
+                <h1>Manage Users</h1>
+                <p class="topbar-subtitle">
+                    View, monitor, activate, and deactivate platform accounts.
+                </p>
+            </div>
+
+            <div class="profile-area">
+                <div class="profile-avatar">
+                    {{ (current_admin.display_name or current_admin.email or "A")[0] | upper }}
+                </div>
+
+                <div class="profile-details">
+                    <strong>{{ current_admin.display_name or "Administrator" }}</strong>
+                    <span>{{ current_admin.email }}</span>
+                </div>
+            </div>
+        </header>
+
+        <section class="admin-page-section">
+
+            <div class="admin-page-summary">
+                <div>
+                    <span class="section-eyebrow">USER MANAGEMENT</span>
+                    <h2>Registered accounts</h2>
+                    <p>Review and manage researcher and administrator accounts.</p>
+                </div>
+
+                <div class="admin-count">
+                    <span>Total registered users</span>
+                    <strong>{{ total_users }}</strong>
+                </div>
+            </div>
+
+            <section class="content-card">
+
+                <div class="card-heading">
+                    <div>
+                        <h2>All users</h2>
+                        <p>
+                            Manage account access without deleting user records.
+                        </p>
+                    </div>
+                </div>
+
+<form method="GET" action="/admin/users" class="user-filter-form">
+
+    <div class="user-filter-group">
+        <label for="search">Search users</label>
+        <input
+            type="search"
+            id="search"
+            name="search"
+            placeholder="Search name or email"
+            value="{{ search }}"
+        >
+    </div>
+
+    <div class="user-filter-group">
+        <label for="role">User role</label>
+        <select id="role" name="role">
+            <option value="all" {% if role == "all" %}selected{% endif %}>All roles</option>
+            <option value="admin" {% if role == "admin" %}selected{% endif %}>Administrator</option>
+            <option value="researcher" {% if role == "researcher" %}selected{% endif %}>Researcher</option>
+        </select>
+    </div>
+
+    <div class="user-filter-group">
+        <label for="status">Account status</label>
+        <select id="status" name="status">
+            <option value="all" {% if status == "all" %}selected{% endif %}>All statuses</option>
+            <option value="active" {% if status == "active" %}selected{% endif %}>Active</option>
+            <option value="inactive" {% if status == "inactive" %}selected{% endif %}>Inactive</option>
+        </select>
+    </div>
+
+    <div class="user-filter-group">
+        <label for="sort_by">Sort by</label>
+        <select id="sort_by" name="sort_by">
+            <option value="newest" {% if sort_by == "newest" %}selected{% endif %}>Newest first</option>
+            <option value="oldest" {% if sort_by == "oldest" %}selected{% endif %}>Oldest first</option>
+            <option value="name_asc" {% if sort_by == "name_asc" %}selected{% endif %}>Name A–Z</option>
+            <option value="name_desc" {% if sort_by == "name_desc" %}selected{% endif %}>Name Z–A</option>
+        </select>
+    </div>
+
+    <button type="submit" class="filter-button">
+        Apply filters
+    </button>
+
+    <a href="/admin/users" class="reset-button">
+        Reset
+    </a>
+
+</form>
+
+<div class="filter-result-count">
+    Showing {{ start_item }}-{{ end_item }}
+    of {{ total_filtered }} matching users
+</div>
+
+
+                <div class="admin-table-wrap">
+                    <table class="admin-table">
+
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Account Status</th>
+                                <th>Registered</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td>{{ user.id }}</td>
+
+                                <td>
+                                    <strong>
+                                        {{ user.display_name or "Not provided" }}
+                                    </strong>
+                                </td>
+
+                                <td>{{ user.email }}</td>
+
+                                <td>
+                                    {% if user.is_admin %}
+                                        <span class="admin-badge">
+                                            Administrator
+                                        </span>
+                                    {% else %}
+                                        <span class="admin-badge researcher">
+                                            Researcher
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if user.is_active %}
+                                        <span class="status-badge active">
+                                            Active
+                                        </span>
+                                    {% else %}
+                                        <span class="status-badge inactive">
+                                            Inactive
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {{ user.created_at.strftime("%d %b %Y") if user.created_at else "Unavailable" }}
+                                </td>
+
+                                <td>
+                                    {% if user.id == current_admin.id %}
+                                        <span class="current-account">
+                                            Current account
+                                        </span>
+                                    {% else %}
+                                    <a href="/admin/users/{{ user.id }}"
+                                    class="view-details-button">
+                                         View Details
+                                    </a>
+                                        <form
+                                            method="POST"
+                                            action="/admin/users/{{ user.id }}/toggle-status"
+                                            class="account-action-form"
+                                            onsubmit="return confirm('Are you sure you want to change this account status?');"
+                                        >
+                                        {% if user.is_active %}
+                                        <button
+                                            type="submit"
+                                            class="account-action-button deactivate-button"
+                                        >Deactivate
+                                        </button>
+                                        {% else %}
+                                        <button
+                                            type="submit"
+                                            class="account-action-button activate-button"
+                                        >
+                                              Activate
+                                        </button>
+                                        {% endif %}
+                                    </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+
+                            {% else %}
+                            <tr>
+                                <td colspan="7" class="admin-empty">
+                                    No registered users found.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+
+                    </table>
+                </div>
+
+{% if total_pages > 1 %}
+<div class="admin-pagination">
+
+    <div>
+        {% if previous_url %}
+            <a href="{{ previous_url }}" class="pagination-link">
+                Previous
+            </a>
+        {% else %}
+            <span class="pagination-link disabled">Previous</span>
+        {% endif %}
+    </div>
+
+    <div class="pagination-pages">
+        {% for item in page_links %}
+            <a
+                href="{{ item.url }}"
+                class="pagination-link {% if item.number == page %}active{% endif %}"
+            >
+                {{ item.number }}
+            </a>
+        {% endfor %}
+    </div>
+
+    <div>
+        {% if next_url %}
+            <a href="{{ next_url }}" class="pagination-link">
+                Next
+            </a>
+        {% else %}
+            <span class="pagination-link disabled">Next</span>
+        {% endif %}
+    </div>
+
+</div>
+{% endif %}
+
+
+            </section>
+
+        </section>
+
+        <footer class="dashboard-footer">
+            <span class="footer-brand">ResearchLens</span>
+            <span>AI Research Paper Quality Analyzer</span>
+        </footer>
+
+    </main>
+</div>
+
+<script
+    src="{{ url_for('static', path='js/dashboard.js') }}"
+    type="module"
+></script>
+
+</body>
+</html>

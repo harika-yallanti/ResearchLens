@@ -1,0 +1,463 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#172b4d">
+
+    <title>Dashboard | ResearchLens</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', path='css/dashboard.css') }}?v=11"
+    >
+</head>
+
+<body>
+    {% set account_name = current_user.display_name or current_user.email.split("@")[0] if current_user.email else "Researcher" %}
+    {% set account_email = current_user.email or "Signed in" %}
+    {% set avatar_letter = account_name[0] | upper if account_name else "R" %}
+
+    <div class="dashboard-layout">
+
+        <aside class="sidebar">
+            <a href="/dashboard" class="brand">
+                <span class="brand-icon">R</span>
+                <span class="brand-name">ResearchLens</span>
+            </a>
+
+            <div class="sidebar-section">
+                <span class="sidebar-label">WORKSPACE</span>
+
+                <a href="/dashboard" class="sidebar-link active">
+                    <span class="nav-icon">▦</span>
+                    <span>Dashboard</span>
+                </a>
+
+                <a href="/upload" class="sidebar-link">
+                    <span class="nav-icon">↑</span>
+                    <span>Upload Paper</span>
+                </a>
+
+                <a href="/my-papers" class="sidebar-link">
+                    <span class="nav-icon">▤</span>
+                    <span>My Papers</span>
+                </a>
+
+                <a href="/reports" class="sidebar-link">
+                    <span class="nav-icon">▧</span>
+                    <span>Analysis Reports</span>
+                </a>
+
+                <a href="/history" class="sidebar-link">
+                    <span class="nav-icon">◷</span>
+                    <span>History</span>
+                </a>
+            </div>
+
+            <div class="sidebar-bottom">
+                <div class="sidebar-help">
+                    <div class="help-icon">✦</div>
+                    <strong>Improve your research</strong>
+                    <p>
+                        Get AI-powered insights to make your paper
+                        clearer and stronger.
+                    </p>
+                    <a href="/upload">
+                        Analyze a paper <span>→</span>
+                    </a>
+                </div>
+
+                <button
+                    id="logoutButton"
+                    class="logout-button"
+                    type="button"
+                >
+                    <span class="nav-icon">↪</span>
+                    <span>Sign out</span>
+                </button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+
+            <header class="topbar">
+                <div class="page-heading">
+                    <span class="page-eyebrow">RESEARCH WORKSPACE</span>
+                    <h1>Dashboard</h1>
+                    <p class="topbar-subtitle">
+                        Your research quality, all in one place.
+                    </p>
+                </div>
+
+                <div class="profile-area">
+                    <div class="profile-avatar" id="profileAvatar">
+                        {{ avatar_letter }}
+                    </div>
+
+                    <div class="profile-details">
+                        <strong id="profileName">
+                            {{ account_name }}
+                        </strong>
+
+                        <span id="profileEmail">
+                            {{ account_email }}
+                        </span>
+                    </div>
+                </div>
+            </header>
+
+            <section class="welcome-section">
+                <div class="welcome-content">
+                    <span class="welcome-badge">
+                        <span class="welcome-dot"></span>
+                        YOUR AI RESEARCH ASSISTANT
+                    </span>
+
+                    <h2>
+                        Welcome back,
+                        <span id="welcomeName">
+                            {{ account_name.split(" ")[0] }}
+                        </span>
+                    </h2>
+
+                    <p>
+                        Ready to make your research paper stronger,
+                        clearer, and more impactful?
+                    </p>
+
+                    <a href="/upload" class="primary-button">
+                        <span class="button-plus">＋</span>
+                        Analyze a research paper
+                        <span class="button-arrow">→</span>
+                    </a>
+                </div>
+
+                <div class="welcome-decoration" aria-hidden="true">
+                    <div class="decoration-orbit orbit-one"></div>
+                    <div class="decoration-orbit orbit-two"></div>
+                    <div class="decoration-orbit orbit-three"></div>
+                    <div class="decoration-center">R</div>
+                    <span class="decoration-star star-one">✦</span>
+                    <span class="decoration-star star-two">✧</span>
+                    <span class="decoration-star star-three">✦</span>
+                </div>
+            </section>
+
+            <section class="overview-section">
+                <div class="section-heading">
+                    <div>
+                        <span class="section-eyebrow">AT A GLANCE</span>
+                        <h2>Your research overview</h2>
+                        <p>Track your paper analysis activity.</p>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+
+                    <article class="stat-card">
+                        <div class="stat-top">
+                            <div class="stat-icon papers-icon">▤</div>
+                            <span class="stat-label">TOTAL PAPERS</span>
+                        </div>
+
+                        <strong class="stat-number" id="totalPapers">
+                            {{ total_papers }}
+                        </strong>
+
+                        <span class="stat-description">
+                            Papers uploaded for analysis
+                        </span>
+
+                        <div class="stat-accent papers-accent"></div>
+                    </article>
+
+                    <article class="stat-card">
+                        <div class="stat-top">
+                            <div class="stat-icon analyzed-icon">✓</div>
+                            <span class="stat-label">ANALYZED</span>
+                        </div>
+
+                        <strong class="stat-number" id="analyzedPapers">
+                            {{ analyzed_papers }}
+                        </strong>
+
+                        <span class="stat-description">
+                            Papers with completed analysis
+                        </span>
+
+                        <div class="stat-accent analyzed-accent"></div>
+                    </article>
+
+                    <article class="stat-card">
+                        <div class="stat-top">
+                            <div class="stat-icon reports-icon">▧</div>
+                            <span class="stat-label">REPORTS</span>
+                        </div>
+
+                        <strong class="stat-number" id="totalReports">
+                            {{ total_reports }}
+                        </strong>
+
+                        <span class="stat-description">
+                            AI assessment reports generated
+                        </span>
+
+                        <div class="stat-accent reports-accent"></div>
+                    </article>
+
+                </div>
+            </section>
+
+            <section class="content-grid">
+
+                <article class="content-card recent-card">
+                    <div class="card-heading recent-heading">
+                        <div>
+                            <span class="section-eyebrow">YOUR ACTIVITY</span>
+                            <h2>Recent research papers</h2>
+                            <p>
+                                Your latest AI-powered quality assessments.
+                            </p>
+                        </div>
+
+                        <a href="/reports" class="text-link">
+                            View all reports <span>→</span>
+                        </a>
+                    </div>
+
+                    {% if recent_reports %}
+                        <div class="recent-report-list">
+
+                            {% for item in recent_reports %}
+                                {% set report = item.report %}
+                                {% set paper = item.paper %}
+                                {% set score = report.overall_score if report.overall_score is not none else 0 %}
+
+                                <article class="recent-report-card">
+
+                                    <div class="report-card-top">
+                                        <div class="report-file-icon">
+                                            <span>▤</span>
+                                        </div>
+
+                                        <div class="report-file-details">
+                                            <h3 title="{{ paper.original_filename }}">
+                                                {{ paper.original_filename }}
+                                            </h3>
+
+                                            <p>
+                                                <span class="report-date-icon">◷</span>
+
+                                                {% if report.created_at %}
+                                                    {{ report.created_at.strftime("%d %b %Y, %I:%M %p") }}
+                                                {% else %}
+                                                    Date unavailable
+                                                {% endif %}
+                                            </p>
+                                        </div>
+
+                                        {% if report.overall_score is not none %}
+
+                                            {% if report.overall_score >= 80 %}
+                                                <span class="report-quality-badge quality-high">
+                                                    <span class="quality-dot"></span>
+                                                    Excellent
+                                                </span>
+
+                                            {% elif report.overall_score >= 60 %}
+                                                <span class="report-quality-badge quality-medium">
+                                                    <span class="quality-dot"></span>
+                                                    Good
+                                                </span>
+
+                                            {% else %}
+                                                <span class="report-quality-badge quality-low">
+                                                    <span class="quality-dot"></span>
+                                                    Low quality
+                                                </span>
+                                            {% endif %}
+
+                                        {% else %}
+                                            <span class="report-quality-badge quality-pending">
+                                                Score unavailable
+                                            </span>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="report-score-section">
+                                        <div class="report-score-heading">
+                                            <div>
+                                                <span class="score-label">
+                                                    Overall quality score
+                                                </span>
+
+                                                <span class="score-description">
+                                                    AI evaluation result
+                                                </span>
+                                            </div>
+
+                                            <div class="report-score-value">
+                                                {% if report.overall_score is not none %}
+                                                    <strong>
+                                                        {{ report.overall_score }}
+                                                    </strong>
+                                                    <span>/100</span>
+                                                {% else %}
+                                                    <strong>—</strong>
+                                                    <span>/100</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+
+                                        <div class="report-score-track">
+                                            <div
+                                                class="report-score-fill {% if report.overall_score is not none and report.overall_score >= 80 %}score-fill-high{% elif report.overall_score is not none and report.overall_score >= 60 %}score-fill-medium{% else %}score-fill-low{% endif %}"
+                                                data-score="{{ score }}"
+                                                role="progressbar"
+                                                aria-label="Overall quality score"
+                                                aria-valuemin="0"
+                                                aria-valuemax="100"
+                                                aria-valuenow="{{ score }}"
+                                            ></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="report-card-footer">
+                                        <span class="report-card-label">
+                                            <span class="report-check-icon">✓</span>
+                                            AI assessment completed
+                                        </span>
+
+                                        <a
+                                            href="/report/{{ report.id }}"
+                                            class="report-view-button"
+                                        >
+                                            View report
+                                            <span>→</span>
+                                        </a>
+                                    </div>
+
+                                </article>
+                            {% endfor %}
+
+                        </div>
+
+                    {% else %}
+
+                        <div class="recent-empty-state">
+                            <div class="recent-empty-icon">▤</div>
+
+                            <h3>Your research journey starts here</h3>
+
+                            <p>
+                                Upload a research paper to receive an
+                                AI-powered quality score and personalized
+                                improvement suggestions.
+                            </p>
+
+                            <a href="/upload" class="secondary-button">
+                                Analyze your first paper <span>→</span>
+                            </a>
+                        </div>
+
+                    {% endif %}
+                </article>
+
+                <article class="content-card features-card">
+                    <div class="card-heading">
+                        <div>
+                            <span class="section-eyebrow">AI CAPABILITIES</span>
+                            <h2>What ResearchLens evaluates</h2>
+                            <p>
+                                Key areas that contribute to research quality.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="feature-list">
+
+                        <div class="feature-item">
+                            <div class="feature-icon structure-icon">▦</div>
+                            <div>
+                                <strong>Paper structure</strong>
+                                <p>
+                                    Review organization and essential sections.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="feature-item">
+                            <div class="feature-icon writing-icon">✎</div>
+                            <div>
+                                <strong>Writing quality</strong>
+                                <p>
+                                    Improve clarity, grammar, and readability.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="feature-item">
+                            <div class="feature-icon methodology-icon">⌁</div>
+                            <div>
+                                <strong>Methodology</strong>
+                                <p>
+                                    Evaluate the research approach and explanation.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="feature-item">
+                            <div class="feature-icon references-icon">❞</div>
+                            <div>
+                                <strong>References</strong>
+                                <p>
+                                    Review citation and reference consistency.
+                                </p>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="features-footer">
+                        <div class="features-footer-icon">✦</div>
+                        <div>
+                            <strong>Research smarter with AI</strong>
+                            <p>
+                                Turn feedback into actionable improvements.
+                            </p>
+                        </div>
+                    </div>
+                </article>
+
+            </section>
+
+            <footer class="dashboard-footer">
+                <span class="footer-brand">ResearchLens</span>
+                <span>AI Research Paper Quality Analyzer</span>
+            </footer>
+
+        </main>
+    </div>
+
+    <script>
+        document.querySelectorAll(".report-score-fill").forEach((bar) => {
+            const score = Number(bar.dataset.score) || 0;
+            const safeScore = Math.min(100, Math.max(0, score));
+
+            bar.style.width = `${safeScore}%`;
+            bar.setAttribute("aria-valuenow", safeScore);
+        });
+    </script>
+
+    <script
+        src="{{ url_for('static', path='js/dashboard.js') }}"
+        type="module"
+    ></script>
+</body>
+</html>
